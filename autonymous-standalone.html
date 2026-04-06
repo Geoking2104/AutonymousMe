@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonymous.me — Self-Sovereign Identity on Holochain · eIDAS 2.0</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:    #040C18; --bg2: #071220; --bg3: #0A1930;
+  --amber: #E8A020; --teal: #00C9A7; --purple: #7B68EE;
+  --text:  #EAE6DC; --muted: #7A8A99;
+  --border:  rgba(232,160,32,.14); --border2: rgba(0,201,167,.15); --border3: rgba(123,104,238,.2);
+  --mono: 'Courier New',Courier,monospace;
+  --head: 'Arial Black','Helvetica Neue',Arial,sans-serif;
+  --body: 'Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { background:var(--bg); color:var(--text); font-family:var(--body); font-weight:300; line-height:1.65; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background-image:linear-gradient(rgba(232,160,32,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(232,160,32,.028) 1px,transparent 1px); background-size:64px 64px; }
+/* NAV */
+nav { position:fixed; inset:0 0 auto 0; z-index:200; height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 5vw; background:rgba(4,12,24,.94); backdrop-filter:blur(14px); border-bottom:0.5px solid var(--border); }
+.nav-logo { font-family:var(--head); font-size:17px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); text-decoration:none; }
+.nav-logo span { color:var(--text); font-weight:400; }
+.nav-links { display:flex; gap:1.4rem; list-style:none; }
+.nav-links a { color:var(--muted); text-decoration:none; font-size:11px; letter-spacing:.1em; text-transform:uppercase; transition:color .2s; }
+.nav-links a:hover,.nav-links a.active { color:var(--amber); }
+.nav-cta { background:transparent; border:1px solid var(--purple); color:var(--purple); padding:6px 14px; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
+/* SHARED */
+.z1 { position:relative; z-index:1; }
+.section-wrap { position:relative; z-index:1; padding:96px 5vw; }
+
+/* Section collapse toggles */
+.sec-header { display:flex; align-items:flex-start; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+.sec-toggle { flex-shrink:0; margin-top:.3rem; width:48px; height:48px; background:transparent; border:1px solid var(--border); color:var(--muted); font-size:24px; font-weight:300; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; line-height:1; padding:0; }
+.sec-toggle:hover { border-color:var(--amber); color:var(--amber); }
+.sec-toggle.open { border-color:var(--teal); color:var(--teal); }
+
+.section-wrap.bg2 { background:var(--bg2); }
+.inner { max-width:1180px; margin:0 auto; }
+.eyebrow { font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal); margin-bottom:1.2rem; display:block; }
+.eyebrow.amber { color:var(--amber); } .eyebrow.purple { color:var(--purple); }
+h2 { font-family:var(--head); font-size:clamp(38px,5.5vw,68px); font-weight:900; line-height:.93; letter-spacing:-.02em; margin-bottom:1.4rem; }
+h2 em { font-style:normal; color:var(--amber); }
+.lead { font-size:17px; color:var(--muted); max-width:600px; line-height:1.75; margin-bottom:3rem; }
+.btn { display:inline-block; text-decoration:none; font-family:var(--head); font-size:13px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; padding:13px 28px; cursor:pointer; transition:all .2s; border:none; }
+.btn-gold { background:var(--amber); color:var(--bg); } .btn-gold:hover { background:#ffb82a; }
+.btn-ghost { background:transparent; color:var(--text); border:1px solid rgba(234,230,220,.22); } .btn-ghost:hover { border-color:var(--text); }
+.btn-teal { background:transparent; color:var(--teal); border:1px solid var(--teal); } .btn-teal:hover { background:var(--teal); color:var(--bg); }
+.btn-purple { background:transparent; color:var(--purple); border:1px solid var(--purple); } .btn-purple:hover { background:var(--purple); color:#fff; }
+.reveal { opacity:0; transform:translateY(22px); transition:opacity .65s ease,transform .65s ease; }
+.reveal.on { opacity:1; transform:translateY(0); }
+/* HERO */
+.hero { position:relative; z-index:1; min-height:100vh; display:flex; align-items:center; padding:80px 5vw 60px; }
+.hero-inner { max-width:1180px; margin:0 auto; width:100%; display:grid; grid-template-columns:1fr 480px; gap:60px; align-items:center; }
+.hero-eyebrow { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--teal); margin-bottom:1.5rem; }
+.hero h1 { font-family:var(--head); font-size:clamp(58px,8.5vw,104px); font-weight:900; line-height:.88; letter-spacing:-.025em; margin-bottom:1.5rem; }
+.hero h1 em { font-style:normal; color:var(--amber); }
+.hero-sub { font-size:17px; color:var(--muted); max-width:480px; margin-bottom:2.5rem; line-height:1.75; }
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:2rem; }
+.hero-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.pill { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:5px 12px; border:1px solid var(--border); color:var(--muted); }
+.pill.p { border-color:var(--purple); color:var(--purple); }
+.id-card-wrap { display:flex; justify-content:center; align-items:center; position:relative; }
+.id-card { width:300px; background:var(--bg3); border:1px solid var(--border); padding:26px; position:relative; animation:float 4s ease-in-out infinite; }
+.id-card::before { content:''; position:absolute; top:-1px; left:22px; width:56px; height:2px; background:var(--amber); }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+.idc-label { font-family:var(--mono); font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); margin-bottom:1rem; }
+.idc-avatar { width:52px; height:52px; background:var(--bg2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin-bottom:1rem; }
+.idc-field { margin-bottom:11px; }
+.idc-fl { font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+.idc-fv { font-size:13px; font-weight:500; color:var(--text); }
+.idc-hidden { display:flex; gap:4px; align-items:center; }
+.idc-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); opacity:.38; }
+.idc-dot-label { font-size:10px; color:var(--muted); margin-left:4px; }
+.idc-verified { display:flex; align-items:center; gap:8px; margin-top:1.1rem; padding-top:1.1rem; border-top:0.5px solid var(--border); }
+.idc-pulse { width:7px; height:7px; border-radius:50%; background:var(--teal); animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+.idc-verified-txt { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--teal); }
+.idc-hash { font-family:var(--mono); font-size:8px; color:var(--muted); margin-top:6px; word-break:break-all; opacity:.55; }
+.idc-eidas { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border:1px solid var(--purple); color:var(--purple); display:inline-block; margin-top:8px; }
+.fbadge { position:absolute; background:var(--bg3); border:1px solid var(--border2); padding:9px 14px; font-family:var(--mono); font-size:10px; color:var(--teal); letter-spacing:.07em; }
+.fb1 { top:12%; right:-10px; animation:float 3.2s 1s ease-in-out infinite; }
+.fb2 { bottom:16%; left:-18px; animation:float 3.7s .4s ease-in-out infinite; }
+.fb3 { top:52%; right:-30px; animation:float 4s .8s ease-in-out infinite; font-size:9px; border-color:var(--border3); color:var(--purple); }
+/* PROBLEM */
+.prob-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; }
+.prob-card { background:var(--bg); padding:2.4rem 2rem; }
+.prob-num { font-family:var(--head); font-size:54px; font-weight:900; color:var(--amber); line-height:1; margin-bottom:.7rem; }
+.prob-card h3 { font-family:var(--head); font-size:21px; font-weight:900; margin-bottom:.5rem; letter-spacing:-.01em; }
+.prob-card p { font-size:14px; color:var(--muted); line-height:1.65; }
+/* PROBLEM SECTION - expanded */
+.prob-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; }
+.prob-card { background:var(--bg); padding:2.4rem 2rem; }
+.prob-num { font-family:var(--head); font-size:54px; font-weight:900; color:var(--amber); line-height:1; margin-bottom:.7rem; }
+.prob-card h3 { font-family:var(--head); font-size:21px; font-weight:900; margin-bottom:.5rem; letter-spacing:-.01em; }
+.prob-card p { font-size:14px; color:var(--muted); line-height:1.65; }
+/* breach examples */
+.breach-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:1px; }
+.breach-card { background:var(--bg2); padding:1.6rem 1.8rem; border-top:2px solid transparent; }
+.breach-card.bc-red  { border-top-color:#e74c3c; }
+.breach-card.bc-amb  { border-top-color:var(--amber); }
+.breach-card.bc-pur  { border-top-color:var(--purple); }
+.breach-label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.5rem; }
+.breach-card h4 { font-family:var(--head); font-size:17px; font-weight:900; margin-bottom:.4rem; letter-spacing:-.01em; }
+.breach-card .breach-num { font-family:var(--head); font-size:28px; font-weight:900; color:#e74c3c; line-height:1; margin-bottom:.4rem; }
+.breach-card.bc-amb .breach-num { color:var(--amber); }
+.breach-card.bc-pur .breach-num { color:var(--purple); }
+.breach-card p { font-size:13px; color:var(--muted); line-height:1.6; }
+/* stat row */
+.stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); margin-top:1px; }
+.stat-cell { background:var(--bg); padding:1.4rem 1.6rem; }
+.stat-cell-num { font-family:var(--head); font-size:32px; font-weight:900; color:var(--amber); line-height:1; margin-bottom:.3rem; }
+.stat-cell-num.red { color:#e74c3c; }
+.stat-cell-num.teal { color:var(--teal); }
+.stat-cell-num.purple { color:var(--purple); }
+.stat-cell-label { font-size:12px; color:var(--muted); line-height:1.5; }
+/* chain-of-failure */
+.chain-row { display:flex; align-items:stretch; gap:1px; background:var(--border); margin-top:2.5rem; }
+.chain-step { flex:1; background:var(--bg3); padding:1.4rem; }
+.chain-step h4 { font-family:var(--head); font-size:15px; font-weight:900; margin-bottom:.5rem; }
+.chain-step p { font-size:12px; color:var(--muted); line-height:1.55; }
+.chain-arrow { display:flex; align-items:center; justify-content:center; background:var(--bg); width:28px; flex-shrink:0; color:var(--amber); font-size:14px; }
+/* source cite */
+.source-note { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:.4rem; letter-spacing:.04em; } display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:4rem; position:relative; }
+.steps::before { content:''; position:absolute; top:35px; left:calc(16.66% + 22px); right:calc(16.66% + 22px); height:1px; background:linear-gradient(90deg,var(--amber),var(--teal)); z-index:0; }
+.step { padding:0 2rem; position:relative; z-index:1; }
+.step-n { width:70px; height:70px; background:var(--bg2); border:2px solid var(--amber); display:flex; align-items:center; justify-content:center; font-family:var(--head); font-size:26px; font-weight:900; color:var(--amber); margin-bottom:1.4rem; }
+.step-n.t { border-color:var(--teal); color:var(--teal); }
+.step h3 { font-family:var(--head); font-size:24px; font-weight:900; letter-spacing:-.01em; margin-bottom:.7rem; }
+.step p { font-size:14px; color:var(--muted); line-height:1.65; }
+.step-items { margin-top:1rem; }
+.sitem { font-family:var(--mono); font-size:11px; color:var(--muted); padding:6px 0; border-bottom:0.5px solid var(--border); display:flex; align-items:flex-start; gap:8px; }
+.sitem::before { content:'→'; color:var(--teal); font-size:10px; flex-shrink:0; margin-top:1px; }
+/* ARCH */
+.arch-diagram { display:flex; flex-direction:column; gap:1px; background:var(--border); margin-top:3rem; }
+.arch-row { background:var(--bg3); display:flex; align-items:center; gap:1.5rem; padding:1.2rem 1.8rem; transition:background .2s; }
+.arch-row:hover { background:#0d1f33; }
+.arch-layer { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); width:70px; flex-shrink:0; }
+.arch-name { font-family:var(--head); font-size:18px; font-weight:900; width:240px; flex-shrink:0; }
+.arch-name.a { color:var(--amber); } .arch-name.tl { color:var(--teal); } .arch-name.pu { color:var(--purple); }
+.arch-desc { font-size:13px; color:var(--muted); line-height:1.5; }
+.arch-badge { margin-left:auto; font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border:1px solid; flex-shrink:0; }
+.arch-badge.a { border-color:var(--amber); color:var(--amber); } .arch-badge.t { border-color:var(--teal); color:var(--teal); } .arch-badge.pu { border-color:var(--purple); color:var(--purple); }
+.comp-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); margin-top:1px; }
+.comp-card { background:var(--bg); padding:2.4rem; position:relative; overflow:hidden; }
+.comp-card::after { content:''; position:absolute; bottom:0; left:0; width:44px; height:2px; }
+.cc-amber::after { background:var(--amber); } .cc-teal::after { background:var(--teal); } .cc-purple::after { background:var(--purple); }
+.comp-icon { width:40px; height:40px; margin-bottom:1.4rem; }
+.comp-tag { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); margin-bottom:1rem; display:block; }
+.comp-tag.t { color:var(--teal); } .comp-tag.p { color:var(--purple); }
+.comp-card h3 { font-family:var(--head); font-size:24px; font-weight:900; letter-spacing:-.01em; margin-bottom:.7rem; }
+.comp-card p { font-size:14px; color:var(--muted); line-height:1.65; }
+.comp-card ul { list-style:none; margin-top:1.1rem; }
+.comp-card ul li { font-size:13px; color:var(--muted); padding:5px 0; border-bottom:0.5px solid var(--border); display:flex; gap:8px; align-items:flex-start; }
+.comp-card ul li::before { content:'◆'; font-size:7px; color:var(--amber); margin-top:4px; flex-shrink:0; }
+.comp-card ul li.t::before { color:var(--teal); } .comp-card ul li.p::before { color:var(--purple); }
+.comp-full { grid-column:1/-1; } .comp-full ul { display:grid; grid-template-columns:1fr 1fr; gap:0 2rem; }
+/* DEMO TABS */
+.demo-tabs { display:flex; gap:1px; background:var(--border); margin-bottom:0; }
+.demo-tab { flex:1; padding:14px 20px; font-family:var(--head); font-size:13px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; background:var(--bg3); color:var(--muted); text-align:center; transition:all .2s; border:none; border-top:2px solid transparent; }
+.demo-tab.active { background:var(--bg); color:var(--text); }
+.demo-tab.t-amber.active { border-top-color:var(--amber); }
+.demo-tab.t-purple.active { border-top-color:var(--purple); }
+.demo-pane { display:none; }
+.demo-pane.active { display:block; }
+.demo-wrap { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; margin-top:2rem; }
+.demo-panel { border:1px solid var(--border); background:var(--bg); }
+.demo-titlebar { background:var(--bg3); padding:12px 16px; border-bottom:0.5px solid var(--border); display:flex; align-items:center; gap:8px; }
+.demo-titlebar-dots { display:flex; gap:5px; }
+.demo-dot { width:9px; height:9px; border-radius:50%; }
+.demo-title { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-left:8px; }
+.demo-body { padding:1.5rem; }
+.demo-cred { border:0.5px solid var(--border); padding:1.2rem; margin-bottom:1rem; display:flex; align-items:center; gap:1rem; }
+.demo-cred-icon { width:40px; height:40px; background:var(--bg3); border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.demo-cred-name { font-size:13px; font-weight:500; margin-bottom:3px; }
+.demo-cred-issuer { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.demo-cred-status { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; }
+.s-verified { border:1px solid var(--teal); color:var(--teal); } .s-pending { border:1px solid var(--amber); color:var(--amber); }
+.share-request { background:var(--bg3); border:1px solid var(--border2); padding:1.2rem; margin-top:1rem; }
+.share-req-from { font-family:var(--mono); font-size:10px; color:var(--muted); margin-bottom:.8rem; }
+.share-req-from strong { color:var(--text); }
+.share-field { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:0.5px solid var(--border); }
+.share-field:last-of-type { border-bottom:none; }
+.share-field-name { font-size:13px; }
+.share-toggle { width:34px; height:18px; border-radius:9px; background:var(--teal); position:relative; cursor:pointer; flex-shrink:0; transition:background .2s; }
+.share-toggle::after { content:''; position:absolute; top:3px; right:4px; width:12px; height:12px; border-radius:50%; background:white; transition:right .2s; }
+.share-toggle.off { background:rgba(122,138,153,.3); }
+.share-toggle.off::after { right:auto; left:3px; }
+.share-btn-row { display:flex; gap:10px; margin-top:1.2rem; }
+.share-btn { flex:1; padding:10px; text-align:center; font-family:var(--head); font-size:12px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; border:none; transition:all .2s; }
+.share-btn.approve { background:var(--teal); color:var(--bg); } .share-btn.approve:hover { background:#00e6be; }
+.share-btn.deny { background:transparent; border:1px solid var(--border); color:var(--muted); } .share-btn.deny:hover { border-color:#e74c3c; color:#e74c3c; }
+.proof-result { display:none; background:var(--bg3); border:1px solid var(--teal); padding:1.2rem; margin-top:1rem; }
+.proof-result.show { display:block; }
+.proof-title { font-family:var(--mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); margin-bottom:.8rem; }
+.proof-line { font-family:var(--mono); font-size:11px; color:var(--muted); padding:3px 0; }
+.proof-line .pk { color:var(--teal); } .proof-line .pv { color:var(--text); }
+/* OPENID4VP */
+.oidc-flow { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border3); margin-top:2rem; }
+.oidc-panel { background:var(--bg); padding:1.6rem; position:relative; }
+.oidc-panel::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.oidc-panel.step1::before { background:var(--amber); } .oidc-panel.step2::before { background:var(--teal); } .oidc-panel.step3::before { background:var(--purple); }
+.oidc-lbl { font-family:var(--mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase; margin-bottom:1rem; display:block; }
+.oidc-lbl.a { color:var(--amber); } .oidc-lbl.t { color:var(--teal); } .oidc-lbl.p { color:var(--purple); }
+.oidc-panel h4 { font-family:var(--head); font-size:17px; font-weight:900; margin-bottom:.8rem; }
+.oidc-btn { width:100%; padding:11px; font-family:var(--head); font-size:11px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; border:none; margin-bottom:1rem; transition:all .2s; }
+.oidc-btn.a { background:var(--amber); color:var(--bg); } .oidc-btn.a:hover { background:#ffb82a; }
+.oidc-btn.t { background:transparent; border:1px solid var(--teal); color:var(--teal); } .oidc-btn.t:hover { background:var(--teal); color:var(--bg); }
+.oidc-btn.p { background:var(--purple); color:#fff; } .oidc-btn.p:hover { opacity:.85; }
+.oidc-btn:disabled { opacity:.35; cursor:not-allowed; }
+.qr-wrap { background:var(--bg3); padding:16px; text-align:center; display:none; }
+.qr-wrap p { font-family:var(--mono); font-size:10px; color:var(--muted); margin-bottom:10px; }
+.qr-uri { font-family:var(--mono); font-size:9px; color:var(--purple); word-break:break-all; margin-top:10px; opacity:.75; }
+.oidc-meta { display:none; margin-top:.8rem; }
+.oidc-claims { display:none; margin-top:.5rem; }
+.oidc-claim { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:0.5px solid var(--border); font-size:13px; }
+.oidc-claim:last-of-type { border-bottom:none; }
+.jwt-box { display:none; background:#04091A; border:1px solid var(--purple); padding:1rem; margin-top:.8rem; font-family:var(--mono); font-size:10px; line-height:1.7; word-break:break-all; }
+.jwt-box.show { display:block; }
+.jwt-h { color:var(--amber); } .jwt-p { color:var(--teal); } .jwt-s { color:var(--purple); } .jwt-ok { color:var(--teal); font-size:11px; } .jwt-meta { color:var(--muted); }
+.mline { font-family:var(--mono); font-size:11px; color:var(--muted); padding:3px 0; }
+.mline .pk { color:var(--teal); } .mline .pv { color:var(--text); }
+/* SOURCE CHAIN */
+.sc-entry { display:flex; gap:1.4rem; align-items:flex-start; margin-bottom:1px; background:var(--bg); padding:1.2rem 1.6rem; position:relative; }
+.sc-entry::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--border); }
+.sc-entry.t-vp::before { background:var(--purple); } .sc-entry.t-cred::before { background:var(--teal); } .sc-entry.t-did::before { background:var(--amber); } .sc-entry.t-proof::before { background:var(--teal); }
+.sc-hash { font-family:var(--mono); font-size:9px; color:var(--muted); width:90px; flex-shrink:0; padding-top:2px; word-break:break-all; }
+.sc-body { flex:1; }
+.sc-type { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 8px; border:1px solid; margin-bottom:6px; display:inline-block; }
+.sc-type.vp { border-color:var(--purple); color:var(--purple); } .sc-type.cred { border-color:var(--teal); color:var(--teal); } .sc-type.did { border-color:var(--amber); color:var(--amber); } .sc-type.proof { border-color:var(--teal); color:var(--teal); }
+.sc-desc { font-size:13px; color:var(--text); margin-bottom:3px; }
+.sc-time { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.sc-empty { font-family:var(--mono); font-size:12px; color:var(--muted); padding:2rem 0; text-align:center; }
+/* USE CASES */
+.uc-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; margin-top:3rem; }
+.uc-card { border:0.5px solid var(--border); padding:1.7rem 1.4rem; transition:border-color .2s,background .2s; }
+.uc-card:hover { border-color:var(--amber); background:rgba(232,160,32,.04); }
+.uc-ico { font-size:22px; margin-bottom:.9rem; }
+.uc-card h3 { font-family:var(--head); font-size:19px; font-weight:900; margin-bottom:.4rem; letter-spacing:-.01em; }
+.uc-card p { font-size:13px; color:var(--muted); line-height:1.55; }
+.uc-fields { margin-top:1rem; }
+.uc-field { font-family:var(--mono); font-size:10px; color:var(--teal); padding:2px 0; }
+/* COMMUNITY */
+.comm-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+.comm-blocks { display:flex; flex-direction:column; gap:1px; margin-top:2rem; }
+.cb { background:var(--bg); padding:1.4rem; display:flex; gap:1.1rem; align-items:flex-start; }
+.cb-icon { width:36px; height:36px; background:var(--bg3); border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.cb h4 { font-family:var(--head); font-size:17px; font-weight:900; margin-bottom:3px; letter-spacing:-.01em; }
+.cb p { font-size:13px; color:var(--muted); }
+.comm-stats { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); margin-bottom:1.5rem; }
+.cs { background:var(--bg); padding:2rem 1.5rem; text-align:center; }
+.cs-num { font-family:var(--head); font-size:46px; font-weight:900; color:var(--amber); line-height:1; }
+.cs-lbl { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:.4rem; }
+.terminal { background:var(--bg); border:1px solid var(--border); padding:1.4rem; font-family:var(--mono); font-size:12px; }
+.term-bar { display:flex; gap:6px; margin-bottom:1rem; }
+.td { width:10px; height:10px; border-radius:50%; }
+.tl { color:var(--muted); line-height:1.85; }
+.tl .cmd { color:var(--teal); } .tl .out { color:var(--amber); } .tl .cmt { color:rgba(122,138,153,.45); }
+/* ROADMAP */
+.rm-track { position:relative; margin-top:3.5rem; padding-left:2rem; }
+.rm-track::before { content:''; position:absolute; left:0; top:0; bottom:0; width:1px; background:linear-gradient(180deg,var(--amber),var(--teal) 60%,transparent); }
+.rm-item { position:relative; margin-bottom:2.5rem; padding-left:2rem; }
+.rm-item::before { content:''; position:absolute; left:-2rem; top:6px; width:11px; height:11px; border-radius:50%; border:2px solid var(--amber); background:var(--bg); }
+.rm-item.done::before { background:var(--amber); } .rm-item.tl::before { border-color:var(--teal); } .rm-item.tl.done::before { background:var(--teal); }
+.rm-phase { font-family:var(--mono); font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+.rm-item h3 { font-family:var(--head); font-size:22px; font-weight:900; letter-spacing:-.01em; margin-bottom:.4rem; }
+.rm-item p { font-size:14px; color:var(--muted); max-width:560px; }
+.rm-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:.7rem; }
+.rm-tag { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border:1px solid var(--border); color:var(--muted); }
+.rm-tag.dt { border-color:var(--teal); color:var(--teal); } .rm-tag.dp { border-color:var(--purple); color:var(--purple); }
+/* Section collapse toggles */
+window.toggleSection = function(id) {
+  var body = document.getElementById('sec-' + id + '-body');
+  var btn  = document.getElementById('sec-' + id + '-btn');
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  btn.textContent    = open ? '+' : '−';
+  btn.classList.toggle('open', !open);
+  if (!open) {
+    body.querySelectorAll('.reveal').forEach(function(el) {
+      el.classList.remove('on');
+      setTimeout(function() { el.classList.add('on'); }, 60);
+    });
+  }
+};
+
+/* FAQ */
+.faq-list { margin-top:3rem; border-top:0.5px solid var(--border); }
+.faq-item { border-bottom:0.5px solid var(--border); }
+.faq-q { padding:1.4rem 0; font-family:var(--head); font-size:20px; font-weight:900; letter-spacing:-.01em; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:var(--text); user-select:none; }
+.faq-q::after { content:'+'; color:var(--amber); font-size:22px; font-weight:400; flex-shrink:0; }
+.faq-item.open .faq-q::after { content:'−'; }
+.faq-a { font-size:15px; color:var(--muted); line-height:1.75; padding-bottom:1.4rem; max-width:700px; display:none; }
+.faq-item.open .faq-a { display:block; }
+/* FOOTER */
+footer { position:relative; z-index:1; border-top:0.5px solid var(--border); padding:64px 5vw 40px; }
+.footer-inner { max-width:1180px; margin:0 auto; }
+.footer-top { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 1fr; gap:2.5rem; margin-bottom:4rem; }
+.footer-logo { font-family:var(--head); font-size:20px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); margin-bottom:.7rem; }
+.footer-tag { font-size:13px; color:var(--muted); max-width:250px; line-height:1.6; }
+.footer-badge { display:inline-flex; align-items:center; gap:8px; margin-top:1.2rem; font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.oss-pill { border:1px solid var(--teal); color:var(--teal); padding:3px 8px; font-size:9px; }
+.footer-col h5 { font-family:var(--head); font-size:13px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; margin-bottom:1rem; color:var(--text); }
+.footer-col a { display:block; font-size:13px; color:var(--muted); text-decoration:none; margin-bottom:.55rem; transition:color .2s; }
+.footer-col a:hover { color:var(--amber); }
+.footer-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:2rem; border-top:0.5px solid var(--border); flex-wrap:wrap; gap:1rem; }
+.footer-copy { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.06em; }
+.footer-did { font-family:var(--mono); font-size:10px; color:var(--teal); }
+/* CONTACT FORM */
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+.contact-info h3 { font-family:var(--head); font-size:28px; font-weight:900; margin-bottom:.6rem; letter-spacing:-.01em; }
+.contact-info p  { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:1.4rem; }
+.contact-email { display:inline-flex; align-items:center; gap:10px; font-family:var(--mono); font-size:13px; color:var(--amber); text-decoration:none; padding:.7rem 1.2rem; border:1px solid var(--border); margin-bottom:2rem; transition:border-color .2s; }
+.contact-email:hover { border-color:var(--amber); }
+.contact-point { display:flex; gap:1rem; align-items:flex-start; padding:1rem 0; border-bottom:0.5px solid var(--border); }
+.contact-point:last-child { border-bottom:none; }
+.contact-point-icon { font-size:16px; width:32px; flex-shrink:0; }
+.contact-point h4 { font-family:var(--head); font-size:16px; font-weight:900; margin-bottom:2px; }
+.contact-point p  { font-size:13px; color:var(--muted); }
+.cf-form { background:var(--bg); border:1px solid var(--border); }
+.cf-titlebar { background:var(--bg3); padding:12px 16px; border-bottom:0.5px solid var(--border); display:flex; align-items:center; gap:8px; }
+.cf-body { padding:1.8rem; }
+.cf-row { margin-bottom:1.4rem; }
+.cf-label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:.5rem; }
+.cf-input { width:100%; background:var(--bg2); border:1px solid rgba(232,160,32,.2); color:var(--text); font-family:var(--body); font-size:14px; padding:11px 14px; transition:border-color .2s; outline:none; }
+.cf-input:focus { border-color:var(--amber); }
+.cf-input::placeholder { color:rgba(122,138,153,.5); }
+textarea.cf-input { resize:vertical; min-height:110px; line-height:1.55; }
+select.cf-input { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A8A99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+.cf-submit { width:100%; padding:13px; background:var(--amber); color:var(--bg); font-family:var(--head); font-size:14px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; border:none; cursor:pointer; transition:background .2s; }
+.cf-submit:hover { background:#ffb82a; }
+.cf-notice { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:.8rem; line-height:1.6; }
+.cf-success { display:none; padding:1.4rem; background:rgba(0,201,167,.07); border:1px solid var(--teal); text-align:center; }
+.cf-success p { font-family:var(--mono); font-size:11px; color:var(--teal); letter-spacing:.08em; }
+
+/* GDPR MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(4,12,24,.92); overflow-y:auto; padding:40px 5vw; }
+.modal-overlay.open { display:block; }
+.modal-box { max-width:780px; margin:0 auto; background:var(--bg2); border:1px solid var(--border); position:relative; }
+.modal-header { padding:1.6rem 2rem; border-bottom:0.5px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.modal-header-text { }
+.modal-eyebrow { font-family:var(--mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--teal); margin-bottom:.4rem; }
+.modal-title { font-family:var(--head); font-size:26px; font-weight:900; letter-spacing:-.01em; }
+.modal-close { background:transparent; border:1px solid var(--border); color:var(--muted); width:34px; height:34px; font-size:18px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.modal-close:hover { border-color:var(--amber); color:var(--amber); }
+.modal-body { padding:2rem; }
+.modal-section { margin-bottom:2rem; padding-bottom:2rem; border-bottom:0.5px solid var(--border); }
+.modal-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.modal-section h3 { font-family:var(--head); font-size:18px; font-weight:900; letter-spacing:-.01em; margin-bottom:.7rem; color:var(--text); }
+.modal-section h3 .ms-tag { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 8px; border:1px solid; margin-left:10px; vertical-align:middle; font-weight:400; }
+.modal-section h3 .ms-tag.t { border-color:var(--teal); color:var(--teal); }
+.modal-section h3 .ms-tag.a { border-color:var(--amber); color:var(--amber); }
+.modal-section p { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:.8rem; }
+.modal-section p:last-child { margin-bottom:0; }
+.modal-section ul { list-style:none; margin-top:.6rem; }
+.modal-section ul li { font-size:13px; color:var(--muted); padding:5px 0; border-bottom:0.5px solid var(--border); display:flex; gap:10px; align-items:flex-start; line-height:1.55; }
+.modal-section ul li:last-child { border-bottom:none; }
+.modal-section ul li::before { content:'→'; color:var(--teal); font-size:10px; flex-shrink:0; margin-top:3px; }
+.modal-section ul li strong { color:var(--text); font-weight:500; }
+.modal-highlight { background:var(--bg3); border-left:3px solid var(--teal); padding:1rem 1.2rem; margin:1rem 0; }
+.modal-highlight p { font-size:13px; color:var(--text); margin:0; line-height:1.6; }
+.modal-rights-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); margin-top:1rem; }
+.mr-card { background:var(--bg); padding:1rem 1.2rem; }
+.mr-card-label { font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); margin-bottom:.4rem; }
+.mr-card-title { font-size:14px; font-weight:500; color:var(--text); margin-bottom:.3rem; }
+.mr-card-desc { font-size:12px; color:var(--muted); line-height:1.55; }
+.modal-contact-box { background:var(--bg3); border:1px solid var(--border); padding:1.2rem; margin-top:1rem; display:flex; align-items:center; gap:1rem; }
+.modal-contact-box a { font-family:var(--mono); font-size:13px; color:var(--amber); text-decoration:none; }
+.modal-contact-box a:hover { text-decoration:underline; }
+.modal-contact-box p { font-size:13px; color:var(--muted); margin:0; }
+.modal-updated { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:1.6rem; padding-top:1.2rem; border-top:0.5px solid var(--border); }
+  .hero-inner { grid-template-columns:1fr; } .id-card-wrap { display:none; }
+  .prob-grid,.steps,.comp-grid,.uc-grid,.demo-wrap,.comm-grid,.footer-top,.oidc-flow,.contact-grid { grid-template-columns:1fr; }
+  .steps::before { display:none; } .step { padding:0; margin-bottom:2.5rem; }
+  .comp-full ul { grid-template-columns:1fr; } .uc-grid { grid-template-columns:1fr 1fr; }
+  .comm-stats { grid-template-columns:repeat(4,1fr); } .arch-row { flex-wrap:wrap; } .arch-badge { margin-left:0; }
+  .nav-links { display:none; }
+}
+@media (max-width:960px) { .breach-grid,.stat-row { grid-template-columns:1fr 1fr; } .chain-row { flex-direction:column; } .chain-arrow { transform:rotate(90deg); width:auto; height:28px; } }
+@media (max-width:600px) { .uc-grid { grid-template-columns:1fr; } .comm-stats { grid-template-columns:1fr 1fr; } .modal-rights-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="z1">
+  <a class="nav-logo" href="#">AUTON<span>YMOUS.ME</span></a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#components">Architecture</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#openid4vp">OpenID4VP</a></li>
+    <li><a href="#sourcechain">Source Chain</a></li>
+    <li><a href="#usecases">Use cases</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contact">Contact</a></li>
+  <span class="nav-cta">eIDAS 2.0 compliant</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <p class="hero-eyebrow">Built on Holochain · Open Source · Non-profit · Apache 2.0</p>
+      <h1>YOUR<br>IDENTITY,<br><em>YOUR RULES.</em></h1>
+      <p class="hero-sub">Autonymous.me lets you prove who you are — age, address, credentials — without handing over your data to any company, server, or database. eIDAS 2.0 ready via OpenID4VP.</p>
+      <div class="hero-btns">
+        <a href="#how" class="btn btn-gold">See How It Works</a>
+        <a href="#openid4vp" class="btn btn-purple">OpenID4VP Demo</a>
+        <a href="#components" class="btn btn-ghost">Architecture</a>
+      </div>
+      <div class="hero-pills">
+        <span class="pill">No central database</span>
+        <span class="pill">No data brokers</span>
+        <span class="pill">Peer-to-peer</span>
+        <span class="pill">Zero-knowledge proofs</span>
+        <span class="pill p">eIDAS 2.0</span>
+        <span class="pill p">OpenID4VP</span>
+        <span class="pill p">SD-JWT VC</span>
+      </div>
+    </div>
+    <div class="id-card-wrap">
+      <div class="id-card">
+        <p class="idc-label">Autonymous.me Identity · DID</p>
+        <div class="idc-avatar">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="9" r="4.5" stroke="#E8A020" stroke-width="1.4"/>
+            <path d="M3 25c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#E8A020" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="idc-field"><p class="idc-fl">Verified attribute</p><p class="idc-fv">Age ≥ 18 years old</p></div>
+        <div class="idc-field"><p class="idc-fl">Country of residence</p><p class="idc-fv">Verified (not disclosed)</p></div>
+        <div class="idc-field">
+          <p class="idc-fl">Full name</p>
+          <div class="idc-hidden">
+            <div class="idc-dot"></div><div class="idc-dot"></div><div class="idc-dot"></div><div class="idc-dot"></div><div class="idc-dot"></div><div class="idc-dot"></div>
+            <span class="idc-dot-label">hidden by choice</span>
+          </div>
+        </div>
+        <div class="idc-verified"><div class="idc-pulse"></div><p class="idc-verified-txt">Verified on Holochain</p></div>
+        <p class="idc-hash">did:hc:uhCAkTiKSS7oy4mKB2YZxPFzqyN8rVwQ3...</p>
+        <span class="idc-eidas">eIDAS 2.0 · OpenID4VP · SD-JWT</span>
+      </div>
+      <div class="fbadge fb1">✓ Zero-knowledge proof</div>
+      <div class="fbadge fb2">✓ No server. Peer-to-peer.</div>
+      <div class="fbadge fb3">✓ OpenID4VP · SD-JWT VC</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="section-wrap bg2" id="problem">
+  <div class="inner">
+    <span class="eyebrow amber">The problem — 2025 data</span>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
+      <div>
+        <h2>Online identity is<br><em>broken.</em></h2>
+        <p class="lead" style="margin-bottom:0;">Your name, email, SSN, passport, medical records, and financial details sit in thousands of company databases — each one a ticking breach. The 2025 numbers are the worst on record.</p>
+      </div>
+      <button onclick="toggleProblem()" id="prob-toggle-btn"
+        style="flex-shrink:0;margin-top:.4rem;width:52px;height:52px;background:transparent;border:1px solid var(--amber);color:var(--amber);font-size:26px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;"
+        aria-expanded="false" aria-controls="prob-details">
+        <span id="prob-toggle-icon">+</span>
+      </button>
+    </div>
+
+    <!-- COLLAPSIBLE DETAILS -->
+    <div id="prob-details" style="display:none;margin-top:2.5rem;">
+
+    <!-- KEY STATS ROW -->
+    <div class="stat-row reveal">
+      <div class="stat-cell">
+        <p class="stat-cell-num red">3,322</p>
+        <p class="stat-cell-label">Data compromises in the US in 2025 — a new all-time high, up 79% over five years</p>
+        <p class="source-note">Source: ITRC 2025</p>
+      </div>
+      <div class="stat-cell">
+        <p class="stat-cell-num">278M+</p>
+        <p class="stat-cell-label">Individuals affected by breaches in the US alone in 2025</p>
+        <p class="source-note">Source: ITRC 2025</p>
+      </div>
+      <div class="stat-cell">
+        <p class="stat-cell-num red">$4.44M</p>
+        <p class="stat-cell-label">Average global cost per breach (US average: $10.22M). Healthcare: $7.42M.</p>
+        <p class="source-note">Source: IBM Cost of a Data Breach 2025</p>
+      </div>
+      <div class="stat-cell">
+        <p class="stat-cell-num teal">277 days</p>
+        <p class="stat-cell-label">Average time to detect and contain a breach. By then, your data is already sold.</p>
+        <p class="source-note">Source: IBM 2025</p>
+      </div>
+    </div>
+
+    <!-- TREND CHART + 3 CARDS -->
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--border);margin-top:1px;" class="reveal">
+
+      <!-- Trend chart -->
+      <div style="background:var(--bg);padding:2rem 2rem 1.4rem;">
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;">US data breaches — 5-year trend (ITRC)</p>
+        <svg viewBox="0 0 440 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+          <!-- grid lines -->
+          <line x1="44" y1="10"  x2="430" y2="10"  stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <line x1="44" y1="52"  x2="430" y2="52"  stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <line x1="44" y1="94"  x2="430" y2="94"  stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <line x1="44" y1="136" x2="430" y2="136" stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <line x1="44" y1="178" x2="430" y2="178" stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <!-- y axis labels -->
+          <text x="38" y="14"  text-anchor="end" font-size="9" fill="#7A8A99" font-family="monospace">3500</text>
+          <text x="38" y="56"  text-anchor="end" font-size="9" fill="#7A8A99" font-family="monospace">2800</text>
+          <text x="38" y="98"  text-anchor="end" font-size="9" fill="#7A8A99" font-family="monospace">2100</text>
+          <text x="38" y="140" text-anchor="end" font-size="9" fill="#7A8A99" font-family="monospace">1400</text>
+          <text x="38" y="180" text-anchor="end" font-size="9" fill="#7A8A99" font-family="monospace">700</text>
+          <!-- bars: 2021=1,862  2022=1,802  2023=3,205  2024=3,158  2025=3,322 -->
+          <!-- bar width ~60, gap ~17, start x=60 -->
+          <!-- scale: 3500=168px height, so px = val*(168/3500) -->
+          <!-- 2021: 1862 → 89.4px, top = 178-89=89 -->
+          <rect x="60"  y="89"  width="60" height="89"  fill="rgba(232,160,32,.25)" rx="1"/>
+          <rect x="60"  y="89"  width="60" height="2"   fill="var(--amber)"/>
+          <text x="90"  y="84"  text-anchor="middle" font-size="9" fill="var(--amber)" font-family="monospace">1,862</text>
+          <!-- 2022: 1802 → 86.7px, top=91 -->
+          <rect x="137" y="91"  width="60" height="87"  fill="rgba(232,160,32,.25)" rx="1"/>
+          <rect x="137" y="91"  width="60" height="2"   fill="var(--amber)"/>
+          <text x="167" y="86"  text-anchor="middle" font-size="9" fill="var(--amber)" font-family="monospace">1,802</text>
+          <!-- 2023: 3205 → 154px, top=24 -->
+          <rect x="214" y="24"  width="60" height="154" fill="rgba(231,76,60,.25)" rx="1"/>
+          <rect x="214" y="24"  width="60" height="2"   fill="#e74c3c"/>
+          <text x="244" y="19"  text-anchor="middle" font-size="9" fill="#e74c3c" font-family="monospace">3,205</text>
+          <!-- 2024: 3158 → 152px, top=26 -->
+          <rect x="291" y="26"  width="60" height="152" fill="rgba(231,76,60,.25)" rx="1"/>
+          <rect x="291" y="26"  width="60" height="2"   fill="#e74c3c"/>
+          <text x="321" y="21"  text-anchor="middle" font-size="9" fill="#e74c3c" font-family="monospace">3,158</text>
+          <!-- 2025: 3322 → 159.6px, top=18 — highlighted -->
+          <rect x="368" y="18"  width="60" height="160" fill="rgba(231,76,60,.45)" rx="1"/>
+          <rect x="368" y="18"  width="60" height="2"   fill="#e74c3c"/>
+          <text x="398" y="13"  text-anchor="middle" font-size="9" fill="#e74c3c" font-weight="bold" font-family="monospace">3,322 ▲</text>
+          <!-- x axis labels -->
+          <text x="90"  y="193" text-anchor="middle" font-size="9" fill="#7A8A99" font-family="monospace">2021</text>
+          <text x="167" y="193" text-anchor="middle" font-size="9" fill="#7A8A99" font-family="monospace">2022</text>
+          <text x="244" y="193" text-anchor="middle" font-size="9" fill="#7A8A99" font-family="monospace">2023</text>
+          <text x="321" y="193" text-anchor="middle" font-size="9" fill="#7A8A99" font-family="monospace">2024</text>
+          <text x="398" y="193" text-anchor="middle" font-size="9" fill="#e74c3c" font-family="monospace" font-weight="bold">2025</text>
+          <!-- trend arrow -->
+          <path d="M90,87 Q240,80 398,20" stroke="rgba(231,76,60,.4)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+        </svg>
+        <p class="source-note" style="margin-top:.4rem;">US data compromises per year · Source: Identity Theft Resource Center (ITRC) · Statista</p>
+      </div>
+
+      <!-- right: 3 data cards stacked -->
+      <div style="display:flex;flex-direction:column;gap:1px;background:var(--border);">
+        <div style="background:var(--bg3);padding:1.4rem 1.6rem;flex:1;">
+          <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#e74c3c;margin-bottom:.4rem;">SSNs &amp; sensitive data</p>
+          <p style="font-family:var(--head);font-size:28px;font-weight:900;color:#e74c3c;line-height:1;margin-bottom:.3rem;">66%</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.55;">of 2025 breach notices exposed Social Security Numbers. Bank accounts or driver's licenses: <strong style="color:var(--text);">1 in 3</strong> breaches. Once out, it enables lifelong identity theft.</p>
+        </div>
+        <div style="background:var(--bg3);padding:1.4rem 1.6rem;flex:1;">
+          <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem;">Identity fraud losses</p>
+          <p style="font-family:var(--head);font-size:28px;font-weight:900;color:var(--amber);line-height:1;margin-bottom:.3rem;">$27.2B</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.55;">Total identity fraud losses the prior year (Javelin Strategy). In the first 9 months of 2025 alone: <strong style="color:var(--text);">$10.91B</strong> — already a record pace.</p>
+        </div>
+        <div style="background:var(--bg3);padding:1.4rem 1.6rem;flex:1;">
+          <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:.4rem;">Supply-chain attacks</p>
+          <p style="font-family:var(--head);font-size:28px;font-weight:900;color:var(--purple);line-height:1;margin-bottom:.3rem;">~30%</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.55;">of breaches now come from third-party vendors — nearly doubled since 2021. Your data is only as safe as the <strong style="color:var(--text);">weakest link</strong> in a global chain.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- REAL BREACH EXAMPLES -->
+    <div style="margin-top:2.5rem;">
+      <p style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Real breaches · 2025</p>
+    </div>
+    <div class="breach-grid reveal">
+      <div class="breach-card bc-red">
+        <p class="breach-label">February 2025 · Education</p>
+        <h4>PowerSchool</h4>
+        <p class="breach-num">62M+</p>
+        <p>Student and teacher records — SSNs, medical info, grades, addresses. Hackers used stolen contractor credentials. Schools reverted to paper systems.</p>
+      </div>
+      <div class="breach-card bc-pur">
+        <p class="breach-label">June 2025 · Surveillance</p>
+        <h4>Chinese surveillance leak</h4>
+        <p class="breach-num">4B+</p>
+        <p>Records — names, addresses, banking details, biometrics — exposed in a single unsecured database. Nearly half the world's population in one incident.</p>
+      </div>
+      <div class="breach-card bc-amb">
+        <p class="breach-label">2025 · Multiple sectors</p>
+        <h4>Other major hits</h4>
+        <p class="breach-num">184M</p>
+        <p>Plain-text passwords dumped in one file. Plus: Aflac (22.65M), AT&amp;T (44M), Yale New Haven Health (5.5M), Prosper Funding (17.6M).</p>
+      </div>
+    </div>
+
+    <!-- CHAIN OF FAILURE -->
+    <div style="margin-top:2.5rem;">
+      <p style="font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">How one breach cascades into lifelong damage</p>
+    </div>
+    <div class="chain-row reveal">
+      <div class="chain-step">
+        <h4>1. One weak link</h4>
+        <p>A contractor's stolen credentials. A phishing email. An unpatched server. One entry point exposes millions of records.</p>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <h4>2. Data packaged &amp; sold</h4>
+        <p>Your SSN, address, and bank details are repackaged with AI, enriched with other breaches, and sold on dark web markets within hours.</p>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <h4>3. Synthetic fraud</h4>
+        <p>Your data is used to open credit lines, file tax returns, or create synthetic identities — often years after the original breach.</p>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step">
+        <h4>4. You find out last</h4>
+        <p>Average detection time: 277 days. The FTC recorded 1,157,317 identity theft reports in just the first 9 months of 2025 — already a full-year record.</p>
+      </div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-step" style="border-top:2px solid #e74c3c;">
+        <h4 style="color:#e74c3c;">5. Permanent exposure</h4>
+        <p>70% of breach notices disclosed zero details on how it happened. Your SSN cannot be changed. The damage is forever.</p>
+      </div>
+    </div>
+
+    <!-- BOTTOM CALLOUT -->
+    <div style="margin-top:2rem;padding:1.4rem 1.8rem;background:var(--bg);border:1px solid var(--border);display:flex;align-items:flex-start;gap:1.4rem;" class="reveal">
+      <span style="font-size:28px;flex-shrink:0;line-height:1;">🔓</span>
+      <div>
+        <p style="font-family:var(--head);font-size:20px;font-weight:900;margin-bottom:.5rem;">The system is broken by design — not by accident.</p>
+        <p style="font-size:14px;color:var(--muted);line-height:1.7;">Centralized identity databases are honeypots. Every company you share data with is a liability. The only real fix is to stop creating copies of your data in the first place. That is what Autonymous.me was built to do.</p>
+      </div>
+    </div>
+
+    </div><!-- /prob-details -->
+
+  </div>
+</div>
+<div class="section-wrap" id="how">
+  <div class="inner">
+    <span class="eyebrow">How it works</span>
+    <div class="sec-header"><h2>Three steps.<br>No technical<br>knowledge required.</h2>
+      <button class="sec-toggle" id="sec-how-btn" onclick="toggleSection('how')" aria-expanded="false" aria-controls="sec-how-body">+</button>
+    </div>
+    <p class="lead">Autonymous.me makes identity verification as simple as showing your ID in person — but without leaving a digital copy behind.</p>
+    <div id="sec-how-body" style="display:none;">
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3>Create your<br>Digital ID</h3>
+        <p>Create a personal identity record on your device. No account. No password. No email. Your ID lives on your phone or computer — not on any server.</p>
+        <div class="step-items">
+          <div class="sitem">Download the Autonymous.me app</div>
+          <div class="sitem">Scan your official document once</div>
+          <div class="sitem">Your cryptographic DID is generated locally</div>
+          <div class="sitem">The original scan is immediately deleted</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n t">02</div>
+        <h3>Choose what<br>to share</h3>
+        <p>When a service sends an OpenID4VP request (QR or deep link), you select exactly which SD-JWT claims to disclose. Only the selected facts are transmitted.</p>
+        <div class="step-items">
+          <div class="sitem">Age verification (over 18, 21, etc.)</div>
+          <div class="sitem">Country or city of residence</div>
+          <div class="sitem">Professional credentials</div>
+          <div class="sitem">Custom attribute proofs</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3>Verified.<br>Instantly.</h3>
+        <p>The service receives a cryptographic SD-JWT VP Token — eIDAS 2.0 compliant — without receiving any of your actual data. Every action logged on your Source Chain.</p>
+        <div class="step-items">
+          <div class="sitem">Proof validated via OpenID4VP protocol</div>
+          <div class="sitem">No data stored on any server</div>
+          <div class="sitem">Service confirms via direct_post response</div>
+          <div class="sitem">Logged immutably on your Holochain Source Chain</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section-wrap bg2" id="components">
+  <div class="inner">
+    <span class="eyebrow amber">Architecture</span>
+    <div class="sec-header"><h2>Key building<br>components</h2>
+      <button class="sec-toggle" id="sec-components-btn" onclick="toggleSection('components')" aria-expanded="false" aria-controls="sec-components-body">+</button>
+    </div>
+    <p class="lead">Six layers. Proven open standards at every level. eIDAS 2.0 compliant via OpenID4VP and SD-JWT Verifiable Credentials.</p>
+    <div id="sec-components-body" style="display:none;">
+    <div class="arch-diagram reveal">
+      <div class="arch-row">
+        <span class="arch-layer">Layer 6</span>
+        <span class="arch-name pu">OpenID4VP</span>
+        <span class="arch-desc">The presentation protocol. Verifiers generate a signed request (QR or deep link). The wallet responds with a VP Token (dc+sd-jwt). Fully compliant with the EU EUDI Wallet architecture and eIDAS 2.0.</span>
+        <span class="arch-badge pu">eIDAS 2.0</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-layer">Layer 5</span>
+        <span class="arch-name a">Autonymous.me hApp</span>
+        <span class="arch-desc">The user-facing application. Runs locally on your device. Manages your wallet of SD-JWT credentials, processes OpenID4VP requests, generates zero-knowledge proofs, records every action on your Source Chain.</span>
+        <span class="arch-badge a">Holochain hApp</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-layer">Layer 4</span>
+        <span class="arch-name tl">Verifiable Credentials</span>
+        <span class="arch-desc">Digital equivalents of physical documents — signed by trusted issuers. Encoded as SD-JWT: each claim is individually selectable. W3C VC Data Model 2.0 compatible. Issuer registry on Holochain DHT.</span>
+        <span class="arch-badge t">W3C VC 2.0</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-layer">Layer 3</span>
+        <span class="arch-name a">Zero-Knowledge Proofs</span>
+        <span class="arch-desc">Prove a fact without revealing underlying data. "Age ≥ 18" provable without disclosing date of birth. Mathematically impossible to fake. Verifier learns only the boolean result — nothing else.</span>
+        <span class="arch-badge a">zk-SNARKs</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-layer">Layer 2</span>
+        <span class="arch-name tl">Decentralized Identifiers</span>
+        <span class="arch-desc">Cryptographic key pair generated on your device. Private key never leaves. One DID per use case — unlinkable across contexts. Compatible with did:web and did:jwk for eIDAS bridge integrations.</span>
+        <span class="arch-badge t">W3C DID 1.0</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-layer">Layer 1</span>
+        <span class="arch-name a">Holochain</span>
+        <span class="arch-desc">Peer-to-peer framework. No blockchain, no tokens, no mining. Each user maintains their own cryptographic Source Chain. Every VP presentation auto-logged. Data validated by peers, not corporations.</span>
+        <span class="arch-badge a">Open Source</span>
+      </div>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card cc-purple">
+        <svg class="comp-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="6" y="8" width="28" height="18" rx="2" stroke="#7B68EE" stroke-width="1.5"/>
+          <path d="M6 20h28M14 8v18" stroke="#7B68EE" stroke-width="1" stroke-dasharray="2 2"/>
+          <rect x="14" y="30" width="12" height="6" rx="1" stroke="#7B68EE" stroke-width="1.5"/>
+          <path d="M18 30v-2M22 30v-2" stroke="#7B68EE" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="comp-tag p">Layer 6 — Presentation Protocol</span>
+        <h3>OpenID4VP + SD-JWT</h3>
+        <p>The protocol chosen by the EU for the EUDI Wallet. The verifier sends a signed authorization request; the wallet responds with a VP Token encoded as dc+sd-jwt — a compact format where each claim is individually selectable and disclosable.</p>
+        <ul>
+          <li class="p">Endorsed by eIDAS 2.0 and the EUDI Wallet specification</li>
+          <li class="p">QR code or deep link request initiation</li>
+          <li class="p">Holder binding: cryptographic proof you — not someone else — presented the credential</li>
+          <li class="p">dc+sd-jwt: each claim is a separate cryptographic disclosure hash</li>
+          <li class="p">Nonce prevents replay attacks per-session</li>
+          <li class="p">Compatible with OpenID Connect ecosystems</li>
+        </ul>
+      </div>
+      <div class="comp-card cc-amber">
+        <svg class="comp-icon" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="8" r="4" stroke="#E8A020" stroke-width="1.5"/>
+          <circle cx="8" cy="32" r="4" stroke="#E8A020" stroke-width="1.5"/>
+          <circle cx="32" cy="32" r="4" stroke="#E8A020" stroke-width="1.5"/>
+          <path d="M17 11L11 29M23 11L29 29M11 29l18-18" stroke="#E8A020" stroke-width="1" stroke-dasharray="2 3"/>
+        </svg>
+        <span class="comp-tag">Layer 1 — The Network</span>
+        <h3>Holochain</h3>
+        <p>Instead of a shared global ledger, Holochain gives each user their own cryptographic Source Chain. Peers validate actions against shared application rules — no corporation can censor or modify your chain. Every VP presentation is auto-logged.</p>
+        <ul>
+          <li>No cryptocurrency, no gas fees — completely free</li>
+          <li>Works offline, syncs when back online</li>
+          <li>Every OpenID4VP presentation logged on your Source Chain</li>
+          <li>Scales linearly with number of users</li>
+        </ul>
+      </div>
+      <div class="comp-card cc-teal">
+        <svg class="comp-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="10" y="6" width="20" height="28" rx="2" stroke="#00C9A7" stroke-width="1.5"/>
+          <path d="M16 14h8M16 20h5M16 26h6" stroke="#00C9A7" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="30" cy="30" r="6" fill="#040C18" stroke="#00C9A7" stroke-width="1.5"/>
+          <path d="M28 30l2 2 3-3" stroke="#00C9A7" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span class="comp-tag t">Layers 2 + 4 — Identity & Credentials</span>
+        <h3>DIDs + Verifiable Credentials</h3>
+        <p>A DID is a cryptographic key pair — the private key never leaves your device. VCs are signed claims from trusted issuers encoded as SD-JWT. Together they power OpenID4VP's selective disclosure: each attribute is a separate hash you can choose to reveal or withhold.</p>
+        <ul>
+          <li class="t">W3C DID 1.0 + W3C VC Data Model 2.0</li>
+          <li class="t">SD-JWT: each attribute is individually disclosable</li>
+          <li class="t">Context-specific DIDs prevent cross-service tracking</li>
+          <li class="t">Issuer registry maintained on Holochain DHT</li>
+        </ul>
+      </div>
+      <div class="comp-card cc-amber comp-full">
+        <svg class="comp-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="4" y="10" width="14" height="20" rx="2" stroke="#E8A020" stroke-width="1.5"/>
+          <rect x="22" y="10" width="14" height="20" rx="2" stroke="#E8A020" stroke-width="1.5"/>
+          <path d="M18 20h4M18 16l4 4-4 4" stroke="#E8A020" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="comp-tag">Layer 5 — The Application</span>
+        <h3>Autonymous.me hApp</h3>
+        <p>The hApp ties all layers together. Runs locally — no login required. Manages your DIDs, stores SD-JWT credentials, processes OpenID4VP requests (QR scan → claim selection → VP Token), generates zero-knowledge proofs, and records every action immutably on your Holochain Source Chain.</p>
+        <ul>
+          <li>Local key management — private keys never leave the device</li>
+          <li>OpenID4VP request handler: QR/deep link → claim selection → VP Token (dc+sd-jwt)</li>
+          <li>SD-JWT credential wallet with per-request selective disclosure UI</li>
+          <li>Peer discovery and issuer validation via Holochain DHT</li>
+          <li>Every verification request logged immutably on Source Chain</li>
+          <li>Cross-platform: mobile (iOS/Android), desktop, browser extension</li>
+        </ul>
+        <button onclick="toggleHappDiagram()" id="happ-diag-btn" style="margin-top:1.6rem;background:transparent;border:1px solid var(--amber);color:var(--amber);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:9px 18px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;">
+          <span id="happ-diag-arrow">▶</span> View hApp architecture — no single point of failure
+        </button>
+
+        <!-- EXPANDABLE DIAGRAM -->
+        <div id="happ-diagram" style="display:none;margin-top:1.8rem;">
+
+        <!-- ── INTRO ── -->
+        <div style="padding:1rem 1.4rem;background:rgba(123,104,238,.07);border:1px solid var(--border3);margin-bottom:2rem;display:flex;gap:1rem;align-items:flex-start;">
+          <span style="flex-shrink:0;margin-top:2px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#7B68EE" stroke-width="1.2"/><path d="M8 7v5M8 5.5v.5" stroke="#7B68EE" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </span>
+          <div>
+            <p style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);margin-bottom:.3rem;">How the three actors interact — and why there is no single point of failure</p>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6;">Click each step below to walk through a full OpenID4VP verification. Every actor runs its own code. No central server coordinates any of it. If any single node disappears, the others continue working.</p>
+          </div>
+        </div>
+
+        <!-- ── STEP SELECTOR ── -->
+        <div id="flow-steps" style="display:flex;gap:1px;background:var(--border);margin-bottom:1px;">
+          <button class="flow-step-btn active" data-step="0" onclick="setFlowStep(0)" style="flex:1;padding:10px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg);color:var(--amber);border:none;cursor:pointer;border-top:2px solid var(--amber);">1 · Issuance</button>
+          <button class="flow-step-btn" data-step="1" onclick="setFlowStep(1)" style="flex:1;padding:10px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg3);color:var(--muted);border:none;cursor:pointer;border-top:2px solid transparent;">2 · Request</button>
+          <button class="flow-step-btn" data-step="2" onclick="setFlowStep(2)" style="flex:1;padding:10px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg3);color:var(--muted);border:none;cursor:pointer;border-top:2px solid transparent;">3 · Disclosure</button>
+          <button class="flow-step-btn" data-step="3" onclick="setFlowStep(3)" style="flex:1;padding:10px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg3);color:var(--muted);border:none;cursor:pointer;border-top:2px solid transparent;">4 · Verification</button>
+          <button class="flow-step-btn" data-step="4" onclick="setFlowStep(4)" style="flex:1;padding:10px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg3);color:var(--muted);border:none;cursor:pointer;border-top:2px solid transparent;">5 · Source Chain</button>
+        </div>
+
+        <!-- ── THREE-COLUMN MOCKUP STAGE ── -->
+        <div style="display:grid;grid-template-columns:1fr 80px 1fr 80px 1fr;gap:0;background:var(--border);margin-bottom:1px;" id="flow-stage">
+
+          <!-- ISSUER SCREEN -->
+          <div style="background:var(--bg);padding:0;overflow:hidden;">
+            <div style="background:var(--bg3);padding:10px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#ff5f57;"></div><div style="width:8px;height:8px;border-radius:50%;background:#febc2e;"></div><div style="width:8px;height:8px;border-radius:50%;background:#28c840;"></div></div>
+              <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);">Issuer</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px;" id="issuer-subtitle">Ministry of Interior · FR</span>
+            </div>
+            <div id="issuer-body" style="padding:14px;">
+              <!-- step content injected by JS -->
+            </div>
+          </div>
+
+          <!-- ARROW ISSUER→WALLET -->
+          <div id="arrow-iw" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);padding:8px 4px;gap:6px;">
+            <div id="arrow-iw-line" style="width:2px;flex:1;background:linear-gradient(180deg,var(--amber) 0%,var(--amber) 0%);transition:background-size .4s;background-size:0% 100%;background-repeat:no-repeat;position:relative;">
+              <div id="arrow-iw-dot" style="width:8px;height:8px;border-radius:50%;background:var(--amber);position:absolute;left:-3px;top:0;transition:top .6s ease-in-out;opacity:0;"></div>
+            </div>
+            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" id="arrow-iw-head"><path d="M1 1l5 4-5 4" stroke="#E8A020" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--muted);writing-mode:vertical-lr;text-transform:uppercase;letter-spacing:.1em;transform:rotate(180deg);" id="arrow-iw-label">SD-JWT VC</span>
+          </div>
+
+          <!-- USER DEVICE SCREEN -->
+          <div style="background:var(--bg);overflow:hidden;border:1px solid rgba(232,160,32,.3);">
+            <div style="background:var(--bg3);padding:10px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#ff5f57;"></div><div style="width:8px;height:8px;border-radius:50%;background:#febc2e;"></div><div style="width:8px;height:8px;border-radius:50%;background:#28c840;"></div></div>
+              <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);">Autonymous.me Wallet</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--teal);margin-left:auto;display:flex;align-items:center;gap:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--teal);animation:blink 2s infinite;"></span>local</span>
+            </div>
+            <div id="wallet-body" style="padding:14px;">
+            </div>
+          </div>
+
+          <!-- ARROW WALLET→VERIFIER -->
+          <div id="arrow-wv" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);padding:8px 4px;gap:6px;">
+            <div id="arrow-wv-line" style="width:2px;flex:1;background:var(--bg2);position:relative;">
+              <div id="arrow-wv-dot" style="width:8px;height:8px;border-radius:50%;background:var(--purple);position:absolute;left:-3px;top:0;transition:top .6s ease-in-out;opacity:0;"></div>
+            </div>
+            <svg width="12" height="10" viewBox="0 0 12 10" fill="none" id="arrow-wv-head"><path d="M1 1l5 4-5 4" stroke="#7A8A99" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--muted);writing-mode:vertical-lr;text-transform:uppercase;letter-spacing:.1em;transform:rotate(180deg);" id="arrow-wv-label">VP Token</span>
+          </div>
+
+          <!-- VERIFIER SCREEN -->
+          <div style="background:var(--bg);overflow:hidden;">
+            <div style="background:var(--bg3);padding:10px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#ff5f57;"></div><div style="width:8px;height:8px;border-radius:50%;background:#febc2e;"></div><div style="width:8px;height:8px;border-radius:50%;background:#28c840;"></div></div>
+              <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);">Verifier</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px;" id="verifier-subtitle">Bank X · EUDI Wallet</span>
+            </div>
+            <div id="verifier-body" style="padding:14px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── HOLOCHAIN NETWORK BAR ── -->
+        <div style="background:var(--bg3);border:0.5px solid var(--border2);padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;" id="holochain-bar">
+          <div>
+            <span style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);">Holochain DHT — peer network</span>
+            <p style="font-size:12px;color:var(--muted);margin-top:2px;" id="holochain-desc">Issuer registry available to all peers. No central directory.</p>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;" id="holochain-nodes">
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted);">Peers:</span>
+            <!-- nodes rendered by JS -->
+          </div>
+        </div>
+
+        <!-- ── STEP DESCRIPTION ── -->
+        <div style="padding:1.2rem 1.4rem;background:var(--bg);border:0.5px solid var(--border);margin-top:1px;">
+          <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem;" id="step-title">Step 1 · Credential issuance</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.65;" id="step-desc">The issuer (a government ministry, a bank, a university) signs a Verifiable Credential in SD-JWT format and delivers it directly to the user's wallet. The credential is encrypted and stored locally on the user's device. The issuer keeps no copy and has no visibility into future use of the credential.</p>
+          <div style="display:flex;gap:1.5rem;margin-top:.8rem;flex-wrap:wrap;" id="step-tags"></div>
+        </div>
+
+        </div><!-- /happ-diagram -->
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- DEMO + OPENID4VP (tabbed) -->
+<div class="section-wrap" id="demo">
+  <div class="inner">
+    <span class="eyebrow">Interactive prototype</span>
+    <div class="sec-header"><h2>Try it yourself.<br>No installation<br>required.</h2>
+      <button class="sec-toggle" id="sec-demo-btn" onclick="toggleSection('demo')" aria-expanded="false" aria-controls="sec-demo-body">+</button>
+    </div>
+    <p class="lead">Two simulation modes: a simplified wallet demo, and a full OpenID4VP flow (eIDAS 2.0 compliant). Every approval logs an entry to your Holochain Source Chain below.</p>
+    <div id="sec-demo-body" style="display:none;">
+    <div class="demo-tabs">
+      <button class="demo-tab t-amber active" onclick="switchTab('simple',this)">Simple Wallet Demo</button>
+      <button id="openid4vp" class="demo-tab t-purple" onclick="switchTab('openid',this)">OpenID4VP / eIDAS 2.0 Full Flow</button>
+    </div>
+
+    <!-- SIMPLE -->
+    <div id="pane-simple" class="demo-pane active">
+      <div class="demo-wrap">
+        <div class="demo-panel">
+          <div class="demo-titlebar">
+            <div class="demo-titlebar-dots"><div class="demo-dot" style="background:#ff5f57;"></div><div class="demo-dot" style="background:#febc2e;"></div><div class="demo-dot" style="background:#28c840;"></div></div>
+            <span class="demo-title">Autonymous.me Wallet · My Credentials</span>
+          </div>
+          <div class="demo-body">
+            <div class="demo-cred"><div class="demo-cred-icon">🪪</div><div><p class="demo-cred-name">National Identity Card</p><p class="demo-cred-issuer">Issued by: Ministry of Interior · FR</p></div><span class="demo-cred-status s-verified">✓ Active</span></div>
+            <div class="demo-cred"><div class="demo-cred-icon">🎓</div><div><p class="demo-cred-name">Master's Degree — Computer Science</p><p class="demo-cred-issuer">Issued by: Université Paris-Saclay</p></div><span class="demo-cred-status s-verified">✓ Active</span></div>
+            <div class="demo-cred"><div class="demo-cred-icon">🏦</div><div><p class="demo-cred-name">KYC Level 2 — Financial</p><p class="demo-cred-issuer">Issued by: BNP Paribas Compliance</p></div><span class="demo-cred-status s-pending">⏳ Pending</span></div>
+            <div class="share-request">
+              <p class="share-req-from">Request from: <strong>OpenVote Platform</strong></p>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:.8rem;">Select which attributes to share.</p>
+              <div class="share-field"><span class="share-field-name">Age ≥ 18</span><div class="share-toggle" id="tog-age" onclick="toggleField(this)"></div></div>
+              <div class="share-field"><span class="share-field-name">Country of residence</span><div class="share-toggle" id="tog-country" onclick="toggleField(this)"></div></div>
+              <div class="share-field"><span class="share-field-name">Full name</span><div class="share-toggle off" id="tog-name" onclick="toggleField(this)"></div></div>
+              <div class="share-field"><span class="share-field-name">Date of birth</span><div class="share-toggle off" id="tog-dob" onclick="toggleField(this)"></div></div>
+              <div class="share-field"><span class="share-field-name">Home address</span><div class="share-toggle off" id="tog-addr" onclick="toggleField(this)"></div></div>
+              <div class="share-btn-row">
+                <button class="share-btn approve" onclick="approveSimple()">Generate Proof &amp; Share</button>
+                <button class="share-btn deny" onclick="denySimple()">Deny Request</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="demo-panel">
+            <div class="demo-titlebar">
+              <div class="demo-titlebar-dots"><div class="demo-dot" style="background:#ff5f57;"></div><div class="demo-dot" style="background:#febc2e;"></div><div class="demo-dot" style="background:#28c840;"></div></div>
+              <span class="demo-title">OpenVote Platform · Verification result</span>
+            </div>
+            <div class="demo-body">
+              <div id="proof-waiting" style="text-align:center;padding:2rem 0;color:var(--muted);font-size:14px;">
+                <p style="font-size:32px;margin-bottom:1rem;">⏳</p>
+                <p>Awaiting user approval...</p>
+                <p style="font-size:12px;margin-top:.5rem;font-family:var(--mono);">Listening on DID channel</p>
+              </div>
+              <div class="proof-result" id="proof-ok">
+                <p class="proof-title">✓ Zero-Knowledge Proof Received</p>
+                <div class="proof-line"><span class="pk">age_gte_18 </span><span class="pv" id="p-age">—</span></div>
+                <div class="proof-line"><span class="pk">country    </span><span class="pv" id="p-country">—</span></div>
+                <div class="proof-line"><span class="pk">full_name  </span><span class="pv" id="p-name">—</span></div>
+                <div class="proof-line"><span class="pk">birth_date </span><span class="pv" id="p-dob">—</span></div>
+                <div class="proof-line"><span class="pk">address    </span><span class="pv" id="p-addr">—</span></div>
+                <div style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--border);">
+                  <div class="proof-line"><span class="pk">verified   </span><span style="color:var(--teal);">TRUE</span></div>
+                  <div class="proof-line"><span class="pk">timestamp  </span><span class="pv" id="p-ts">—</span></div>
+                  <div class="proof-line"><span class="pk">data_stored</span><span style="color:#e74c3c;">NONE</span></div>
+                </div>
+              </div>
+              <div class="proof-result" id="proof-denied" style="border-color:rgba(231,76,60,.5);">
+                <p class="proof-title" style="color:#e74c3c;">✗ Request Denied by User</p>
+                <div class="proof-line">No data was transmitted. No record was created.</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:1.5rem;padding:1.2rem;border:0.5px solid var(--border);background:var(--bg3);">
+            <p style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.6rem;">What the platform actually receives</p>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6;">Only the attributes you toggled on. The platform cannot see, store, or infer anything else. The proof is single-use and expires after verification.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pane-simple -->
+
+    <!-- OPENID4VP -->
+    <div id="pane-openid" class="demo-pane">
+      <div style="padding:1rem 1.5rem;background:var(--bg3);border:1px solid var(--border3);margin:1.5rem 0;display:flex;align-items:flex-start;gap:1.2rem;">
+        <span style="font-size:20px;flex-shrink:0;">ℹ️</span>
+        <div>
+          <p style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--purple);margin-bottom:.4rem;">eIDAS 2.0 · OpenID4VP simulation</p>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;">Simulates the full OpenID4VP flow as specified by the EU EUDI Wallet architecture. Follow Steps 1 → 2 → 3. The SD-JWT VP Token shown is structurally accurate (base64url-encoded header.payload.signature~disclosure~ format). Each presentation is automatically logged on your Holochain Source Chain.</p>
+        </div>
+      </div>
+      <div class="oidc-flow">
+        <!-- STEP 1: VERIFIER -->
+        <div class="oidc-panel step1">
+          <span class="oidc-lbl a">Step 1 · Verifier</span>
+          <h4>Bank X — EUDI Wallet Request</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1.2rem;line-height:1.55;">The verifier generates a signed OpenID4VP authorization request. In production this is a QR code or deep link — scanned by your wallet app.</p>
+          <button class="oidc-btn a" id="btn-genqr" onclick="generateQRRequest()">Generate OpenID4VP Request</button>
+          <div id="qr-section" class="qr-wrap">
+            <p>Scan with your Autonymous.me Wallet</p>
+            <canvas id="qrCanvas" width="180" height="180" style="border:2px solid var(--purple);display:block;margin:0 auto;"></canvas>
+            <p class="qr-uri" id="qr-uri-text"></p>
+          </div>
+          <div id="step1-meta" class="oidc-meta">
+            <div class="mline"><span class="pk">response_type </span><span class="pv">vp_token</span></div>
+            <div class="mline"><span class="pk">client_id     </span><span class="pv">bank-x.eudi.example</span></div>
+            <div class="mline"><span class="pk">nonce         </span><span class="pv" id="nonce-val">—</span></div>
+            <div class="mline"><span class="pk">response_mode </span><span class="pv">direct_post</span></div>
+            <div class="mline"><span class="pk">format        </span><span class="pv">dc+sd-jwt</span></div>
+          </div>
+        </div>
+        <!-- STEP 2: WALLET -->
+        <div class="oidc-panel step2">
+          <span class="oidc-lbl t">Step 2 · Autonymous.me Wallet</span>
+          <h4>Scan &amp; Selective Disclosure</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1.2rem;line-height:1.55;">Your wallet parses the presentation_definition from the request and presents the matching credentials. You select which claims to include in the VP Token — only selected claims are hashed and disclosed.</p>
+          <button class="oidc-btn t" id="btn-scan" onclick="simulateScan()" disabled>Scan QR Code</button>
+          <div id="oidc-claim-panel" class="oidc-claims">
+            <p style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem;">Select claims to disclose</p>
+            <div class="oidc-claim"><span>Age ≥ 18</span><div class="share-toggle" id="oc-age" onclick="toggleField(this)"></div></div>
+            <div class="oidc-claim"><span>Country of residence</span><div class="share-toggle" id="oc-country" onclick="toggleField(this)"></div></div>
+            <div class="oidc-claim"><span>Full name</span><div class="share-toggle off" id="oc-name" onclick="toggleField(this)"></div></div>
+            <div class="oidc-claim"><span>Date of birth</span><div class="share-toggle off" id="oc-dob" onclick="toggleField(this)"></div></div>
+            <button class="oidc-btn p" style="margin-top:1rem;" onclick="approveAndPresent()">Approve &amp; Present VP Token</button>
+          </div>
+        </div>
+        <!-- STEP 3: RESULT -->
+        <div class="oidc-panel step3">
+          <span class="oidc-lbl p">Step 3 · Verification Result</span>
+          <h4>VP Token · dc+sd-jwt</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1.2rem;line-height:1.55;">The verifier receives a VP Token. Each disclosed claim has its own salt+hash. Undisclosed claims are provably absent — not just omitted. Nonce confirms single-use.</p>
+          <div id="jwt-waiting" style="text-align:center;padding:1.5rem 0;color:var(--muted);font-size:13px;">
+            <p style="font-size:28px;margin-bottom:.8rem;">🔐</p>
+            <p>Waiting for wallet presentation...</p>
+          </div>
+          <div class="jwt-box" id="jwt-result"></div>
+          <div id="sc-notice" style="display:none;margin-top:.8rem;padding:.8rem;background:var(--bg3);border:0.5px solid var(--border2);">
+            <p style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;">✓ Logged to Source Chain</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:.3rem;">This presentation was automatically recorded as an immutable entry on your Holochain Source Chain.</p>
+            <a href="#sourcechain" onclick="document.getElementById('sourcechain').scrollIntoView({behavior:'smooth'})" style="font-family:var(--mono);font-size:10px;color:var(--teal);text-decoration:none;display:block;margin-top:.5rem;cursor:pointer;">→ View Source Chain ↓</a>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pane-openid --></div>
+  </div>
+</div>
+
+<!-- SOURCE CHAIN -->
+<div class="section-wrap bg2" id="sourcechain">
+  <div class="inner">
+    <span class="eyebrow">Holochain audit log</span>
+    <div class="sec-header"><h2>Your Source<br>Chain</h2>
+      <button class="sec-toggle" id="sec-sourcechain-btn" onclick="toggleSection('sourcechain')" aria-expanded="false" aria-controls="sec-sourcechain-body">+</button>
+    </div>
+    <p class="lead">Every action in Autonymous.me is recorded as an immutable entry on your personal Holochain Source Chain. You own the log. No one can alter or delete it without breaking the hash chain.</p>
+    <div id="sec-sourcechain-body" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:1rem;">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">DID: <span style="color:var(--teal);">did:hc:uhCAkTiKSS7oy4mKB2...</span></div>
+      <button onclick="clearChain()" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;cursor:pointer;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='rgba(232,160,32,.14)'">Clear demo entries</button>
+    </div>
+    <div id="sc-list">
+      <div class="sc-entry t-did">
+        <div class="sc-hash">Qm3xG9a1b2...</div>
+        <div class="sc-body"><span class="sc-type did">DID Init</span><p class="sc-desc">Identity wallet initialized. DID keypair generated locally.</p><p class="sc-time">2025-01-14 09:00 — Genesis entry</p></div>
+      </div>
+      <div class="sc-entry t-cred">
+        <div class="sc-hash">QmB7f2h8c3...</div>
+        <div class="sc-body"><span class="sc-type cred">VC Import</span><p class="sc-desc">Verifiable Credential imported: National Identity Card (FR Ministry of Interior)</p><p class="sc-time">2025-01-14 09:04</p></div>
+      </div>
+      <div class="sc-entry t-cred">
+        <div class="sc-hash">QmE9k3n2d4...</div>
+        <div class="sc-body"><span class="sc-type cred">VC Import</span><p class="sc-desc">Verifiable Credential imported: Master's Degree, SD-JWT (Université Paris-Saclay)</p><p class="sc-time">2025-01-14 09:06</p></div>
+      </div>
+      <div id="sc-dynamic"></div>
+    </div>
+    <div style="margin-top:.5rem;padding:1.2rem;background:var(--bg3);border:0.5px solid var(--border);">
+      <p style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.6rem;">How Source Chain integrity works</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;">Each entry contains the hash of the previous entry, forming an unbreakable chain. Any attempt to insert, modify, or delete an entry invalidates all subsequent hashes — detectable immediately by any peer. Your privacy history is yours and tamper-proof.</p>
+    </div></div>
+  </div>
+</div>
+
+<!-- USE CASES -->
+<div class="section-wrap" id="usecases">
+  <div class="inner">
+    <span class="eyebrow">Applications</span>
+    <div class="sec-header"><h2>What can you verify<br>with Autonymous.me?</h2>
+      <button class="sec-toggle" id="sec-usecases-btn" onclick="toggleSection('usecases')" aria-expanded="false" aria-controls="sec-usecases-body">+</button>
+    </div>
+    <p class="lead">Any situation where you currently show an ID, fill a form, or upload a document — Autonymous.me replaces it with a privacy-preserving OpenID4VP presentation.</p>
+    <div id="sec-usecases-body" style="display:none;">
+    <div class="uc-grid reveal">
+      <div class="uc-card"><div class="uc-ico">🔞</div><h3>Age Verification</h3><p>Prove you're over 18 or 21 for age-gated services. No name, no date of birth disclosed.</p><div class="uc-fields"><p class="uc-field">→ Proves: age ≥ 18</p><p class="uc-field">→ Hides: full name, DOB</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🏠</div><h3>Address Proof</h3><p>Confirm your country or city for financial services or regulated platforms.</p><div class="uc-fields"><p class="uc-field">→ Proves: resident of France</p><p class="uc-field">→ Hides: street, postcode</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🎓</div><h3>Professional Credentials</h3><p>Prove your degree or license with the institution's cryptographic signature.</p><div class="uc-fields"><p class="uc-field">→ Proves: licensed physician</p><p class="uc-field">→ Hides: university, grades</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🏦</div><h3>KYC / Finance</h3><p>Reusable KYC credential for banking or financial services. eIDAS 2.0 compliant via OpenID4VP.</p><div class="uc-fields"><p class="uc-field">→ Proves: KYC level 2 passed</p><p class="uc-field">→ Hides: account details</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🗳️</div><h3>Civic Participation</h3><p>Vote in community polls or DAO governance with a proof of eligibility — without linking your vote to your identity.</p><div class="uc-fields"><p class="uc-field">→ Proves: eligible voter</p><p class="uc-field">→ Hides: voting choice</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🏥</div><h3>Healthcare</h3><p>Share vaccination status or insurance coverage — only the relevant fact, nothing else.</p><div class="uc-fields"><p class="uc-field">→ Proves: insured, vaccinated</p><p class="uc-field">→ Hides: full medical record</p></div></div>
+      <div class="uc-card"><div class="uc-ico">✈️</div><h3>Travel &amp; Access</h3><p>Prove nationality for visa-free travel without handing your full passport to a private contractor.</p><div class="uc-fields"><p class="uc-field">→ Proves: EU citizen</p><p class="uc-field">→ Hides: passport number</p></div></div>
+      <div class="uc-card"><div class="uc-ico">🔧</div><h3>Build Your Own</h3><p>Define your own credential schema, integrate via OpenID4VP REST API. Apache 2.0 licensed — fork freely.</p><div class="uc-fields"><p class="uc-field">→ OpenID4VP REST API</p><p class="uc-field">→ Open schema registry</p></div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- COMMUNITY -->
+<div class="section-wrap bg2" id="community">
+  <div class="inner">
+    <div class="comm-grid">
+      <div>
+        <span class="eyebrow">Open source · Non-profit</span>
+        <div class="sec-header"><h2>Built by the<br>community,<br>for everyone.</h2>
+      <button class="sec-toggle" id="sec-community-btn" onclick="toggleSection('community')" aria-expanded="false" aria-controls="sec-community-body">+</button>
+    </div>
+        <p class="lead">Autonymous.me is not a company. It's an open-source protocol governed by the people who build and use it.</p>
+    <div id="sec-community-body" style="display:none;">
+        <div class="comm-blocks reveal">
+          <div class="cb"><div class="cb-icon">🛠</div><div><h4>Contribute Code</h4><p>GitHub repo. Report bugs, submit PRs, build OpenID4VP integrations, write tests. All skill levels welcome.</p></div></div>
+          <div class="cb"><div class="cb-icon">🧪</div><div><h4>Test &amp; Give Feedback</h4><p>Non-developers are critical. Run the OpenID4VP flow, report what's confusing. UX is harder to solve than cryptography.</p></div></div>
+          <div class="cb"><div class="cb-icon">📐</div><div><h4>Define the Standards</h4><p>Help design credential schemas, governance rules, and issuer policies. The protocol is community-governed.</p></div></div>
+          <div class="cb"><div class="cb-icon">⚖️</div><div><h4>Regulatory &amp; Legal</h4><p>eIDAS 2.0 compliance needs lawyers and policy experts. Help map OpenID4VP flows to regulatory requirements.</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="comm-stats">
+          <div class="cs"><p class="cs-num">v0.4</p><p class="cs-lbl">Current alpha</p></div>
+          <div class="cs"><p class="cs-num">Open</p><p class="cs-lbl">Governance model</p></div>
+          <div class="cs"><p class="cs-num">Apache</p><p class="cs-lbl">2.0 License</p></div>
+          <div class="cs"><p class="cs-num">W3C</p><p class="cs-lbl">DID + VC Standard</p></div>
+        </div>
+        <div class="terminal">
+          <div class="term-bar"><div class="td" style="background:#ff5f57;"></div><div class="td" style="background:#febc2e;"></div><div class="td" style="background:#28c840;"></div></div>
+          <div class="tl"><span class="cmt"># Clone and run locally</span></div>
+          <div class="tl"><span class="cmd">$</span> git clone https://github.com/autonymous.me/core</div>
+          <div class="tl"><span class="cmd">$</span> cd core && npm install && npm run dev</div>
+          <div class="tl" style="margin-top:.5rem;"><span class="out">✓</span> Holochain conductor started</div>
+          <div class="tl"><span class="out">✓</span> DID wallet initialized</div>
+          <div class="tl"><span class="out">✓</span> OpenID4VP handler ready</div>
+          <div class="tl"><span class="out">✓</span> hApp at localhost:8080</div>
+          <div class="tl" style="margin-top:.5rem;"><span class="cmt"># Issue a test SD-JWT credential</span></div>
+          <div class="tl"><span class="cmd">$</span> autonymous.me vc issue --type age --value 25 --format sd-jwt</div>
+          <div class="tl"><span class="out">✓</span> SD-JWT credential signed locally</div>
+          <div class="tl" style="margin-top:.5rem;"><span class="cmt"># Run OpenID4VP verification</span></div>
+          <div class="tl"><span class="cmd">$</span> autonymous.me openid4vp verify --preset kyc-age</div>
+          <div class="tl"><span class="out">✓</span> VP Token generated: dc+sd-jwt</div>
+          <div class="tl"><span class="out">✓</span> Logged to Source Chain: QmVP9f...</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:1.4rem;">
+          <a href="#" class="btn btn-gold" style="flex:1;text-align:center;">GitHub Repo</a>
+          <a href="#" class="btn btn-ghost" style="flex:1;text-align:center;">Docs</a>
+          <a href="#" class="btn btn-teal" style="flex:1;text-align:center;">Discord</a>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div class="section-wrap" id="roadmap">
+  <div class="inner">
+    <span class="eyebrow amber">Roadmap</span>
+    <div class="sec-header"><h2>Where we are.<br>Where we're going.</h2>
+      <button class="sec-toggle" id="sec-roadmap-btn" onclick="toggleSection('roadmap')" aria-expanded="false" aria-controls="sec-roadmap-body">+</button>
+    </div>
+    <p class="lead">Autonymous.me is in active development. The community sets the priority. Pull requests define the pace.</p>
+    <div id="sec-roadmap-body" style="display:none;">
+    <div class="rm-track reveal">
+      <div class="rm-item done"><p class="rm-phase">Phase 1 · Completed</p><h3>Core Protocol Design</h3><p>DID method specification, Holochain hApp scaffolding, zero-knowledge circuit design, W3C VC schema definitions and SD-JWT encoding specification.</p><div class="rm-tags"><span class="rm-tag dt">did:hc method</span><span class="rm-tag dt">zk circuit v1</span><span class="rm-tag dt">SD-JWT schema v1</span></div></div>
+      <div class="rm-item done"><p class="rm-phase">Phase 2 · Completed</p><h3>Alpha Wallet (Desktop)</h3><p>Local credential wallet for macOS and Linux. Key generation, SD-JWT credential import, basic selective disclosure UI, Source Chain viewer.</p><div class="rm-tags"><span class="rm-tag dt">Key management</span><span class="rm-tag dt">SD-JWT import</span><span class="rm-tag dt">Source Chain UI</span></div></div>
+      <div class="rm-item tl done"><p class="rm-phase">Phase 3 · Completed</p><h3>OpenID4VP Integration</h3><p>Full OpenID4VP authorization flow. QR request generation, wallet-side claim selection, VP Token (dc+sd-jwt) presentation, nonce validation, holder binding.</p><div class="rm-tags"><span class="rm-tag dt">OpenID4VP flow</span><span class="rm-tag dt">dc+sd-jwt</span><span class="rm-tag dt">Holder binding</span><span class="rm-tag dp">eIDAS 2.0 draft</span></div></div>
+      <div class="rm-item tl"><p class="rm-phase">Phase 4 · In Progress</p><h3>Issuer Registry &amp; First Integrations</h3><p>Open issuer registry on Holochain DHT. First trusted issuer onboarding. REST API for service integration. Browser extension beta. eIDAS 2.0 compliance audit.</p><div class="rm-tags"><span class="rm-tag">Issuer registry</span><span class="rm-tag">REST API</span><span class="rm-tag">Browser extension</span><span class="rm-tag dp">eIDAS audit</span></div></div>
+      <div class="rm-item tl"><p class="rm-phase">Phase 5 · Planned Q3 2025</p><h3>Mobile App &amp; Governance</h3><p>iOS and Android apps with full OpenID4VP flow via QR camera. Community governance framework — protocol changes voted on by verified-user credentials.</p><div class="rm-tags"><span class="rm-tag">iOS / Android</span><span class="rm-tag">Governance v1</span><span class="rm-tag">Public testnet</span></div></div>
+      <div class="rm-item tl"><p class="rm-phase">Phase 6 · Planned 2026</p><h3>eIDAS 2.0 Production &amp; EUDI Bridge</h3><p>Full eIDAS 2.0 compliance certification. Bridge to the EU EUDI Wallet ecosystem. Production deployments with verified institutional issuers.</p><div class="rm-tags"><span class="rm-tag dp">eIDAS 2.0 certified</span><span class="rm-tag dp">EUDI Wallet bridge</span><span class="rm-tag">Production issuers</span></div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="section-wrap bg2" id="faq">
+  <div class="inner">
+    <span class="eyebrow">For non-technical people</span>
+    <div class="sec-header"><h2>Plain English FAQ</h2>
+      <button class="sec-toggle" id="sec-faq-btn" onclick="toggleSection('faq')" aria-expanded="false" aria-controls="sec-faq-body">+</button>
+    </div>
+    <p class="lead">No jargon. Direct answers.</p>
+    <div id="sec-faq-body" style="display:none;">
+    <div class="faq-list reveal">
+      <div class="faq-item open"><div class="faq-q">Is this like a blockchain? Do I need crypto or tokens?</div><div class="faq-a">No. Holochain is explicitly not a blockchain. There's no cryptocurrency, no mining, no gas fees, no wallet to fund. It's a peer-to-peer framework — closer to BitTorrent than Bitcoin. Autonymous.me is completely free to use.</div></div>
+      <div class="faq-item"><div class="faq-q">What is OpenID4VP and why does it matter?</div><div class="faq-a">OpenID4VP (OpenID for Verifiable Presentations) is the protocol chosen by the EU for the EUDI Wallet — the digital identity wallet every EU member state must support from 2026. It defines how a service asks your wallet for identity proofs, and how your wallet responds. By supporting OpenID4VP, Autonymous.me is compatible with this ecosystem without requiring any central server.</div></div>
+      <div class="faq-item"><div class="faq-q">What is an SD-JWT and how is it different from a normal JWT?</div><div class="faq-a">A normal JWT reveals all its claims when you present it. An SD-JWT (Selectively Disclosable JWT) hashes each claim individually. You can present a subset of claims while cryptographically proving the hidden claims exist but were deliberately not disclosed. This is what enables "age ≥ 18 without revealing date of birth."</div></div>
+      <div class="faq-item"><div class="faq-q">Where is my data actually stored?</div><div class="faq-a">On your device only. Your identity credentials never leave your phone or computer. When you verify something via OpenID4VP, only the VP Token — containing only your selected claims — is transmitted. The requesting service receives a cryptographic proof. Nothing is stored on any server.</div></div>
+      <div class="faq-item"><div class="faq-q">What is the Source Chain and can anyone read it?</div><div class="faq-a">Your Source Chain is a personal, cryptographically-linked log of every action you take in Autonymous.me. It lives on your device and is replicated only with peers you authorize. It records that a VP presentation happened — not what was presented. Any modification breaks the hash chain and is detectable by peers. You control who can read it.</div></div>
+      <div class="faq-item"><div class="faq-q">Can services track me across different verifications?</div><div class="faq-a">No — by design. Each OpenID4VP presentation uses a fresh, context-specific DID. The nonce in each request ensures single-use. A proof shared with your bank is mathematically unlinkable to a proof shared with a voting platform. Services see only the VP Token, never a persistent identifier.</div></div>
+      <div class="faq-item"><div class="faq-q">Is this legally compliant? Can it replace official KYC?</div><div class="faq-a">The technology is built on W3C open standards (DID, VC Data Model 2.0) and implements OpenID4VP as specified by eIDAS 2.0. Whether a specific deployment is legally sufficient depends on jurisdiction. The project actively seeks regulatory input — lawyers and compliance experts are particularly valuable contributors.</div></div>
+      <div class="faq-item"><div class="faq-q">Who controls the project? Can it be shut down or captured?</div><div class="faq-a">The protocol is open source and cannot be shut down — anyone can fork and run it. There is no company, no venture capital, and no token giving anyone a controlling stake. Governance is community-driven: protocol changes are proposed and voted on by verified participants.</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="section-wrap" id="contact">
+  <div class="inner">
+    <span class="eyebrow">Get in touch</span>
+    <h2>Contact<br>Autonymous.me</h2>
+    <div class="contact-grid reveal">
+
+      <!-- LEFT: info -->
+      <div class="contact-info">
+        <h3>We read every message.</h3>
+        <p>Whether you want to contribute, test the protocol, report a bug, discuss a partnership, or ask a regulatory question — reach out. This is a community project and every voice matters.</p>
+        <a class="contact-email" href="/cdn-cgi/l/email-protection#06757376766974724667737269687f6b697375286b63">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="8" rx="1" stroke="#E8A020" stroke-width="1.2"/><path d="M1 4l6 4 6-4" stroke="#E8A020" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span class="__cf_email__" data-cfemail="6b181e1b1b04191f2b0a1e1f04051206041e1845060e">[email&#160;protected]</span>
+        </a>
+        <div class="contact-point">
+          <div class="contact-point-icon">🛠</div>
+          <div><h4>Developers &amp; Contributors</h4><p>Bug reports, pull requests, architecture discussions, new hApp ideas.</p></div>
+        </div>
+        <div class="contact-point">
+          <div class="contact-point-icon">⚖️</div>
+          <div><h4>Legal &amp; Regulatory</h4><p>eIDAS 2.0 compliance questions, GDPR, issuer onboarding, jurisdiction-specific guidance.</p></div>
+        </div>
+        <div class="contact-point">
+          <div class="contact-point-icon">🏢</div>
+          <div><h4>Partnerships &amp; Integrations</h4><p>Institutional issuers, EUDI Wallet bridge, OpenID4VP service integrations.</p></div>
+        </div>
+        <div class="contact-point">
+          <div class="contact-point-icon">🧪</div>
+          <div><h4>Testing &amp; UX Feedback</h4><p>Ran the demo? Found something confusing? Tell us. Non-developer feedback is essential.</p></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: form -->
+      <div>
+        <div class="cf-form">
+          <div class="cf-titlebar">
+            <div class="demo-titlebar-dots">
+              <div class="demo-dot" style="background:#ff5f57;"></div>
+              <div class="demo-dot" style="background:#febc2e;"></div>
+              <div class="demo-dot" style="background:#28c840;"></div>
+            </div>
+            <span class="demo-title">Send a message</span>
+          </div>
+          <div class="cf-body">
+            <div id="cf-success" class="cf-success">
+              <p style="font-size:22px;margin-bottom:.6rem;">✓</p>
+              <p>Message sent. We'll reply to your email shortly.</p>
+            </div>
+            <form id="contact-form"
+              action="https://formsubmit.co/geoffroydelatournelle@gmail.com"
+              method="POST"
+              onsubmit="handleFormSubmit(event)">
+
+              <!-- Formsubmit config -->
+              <input type="hidden" name="_replyto" value="">
+              <input type="hidden" name="_subject" value="[Autonymous.me] New contact message">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_next" value="">
+
+              <div class="cf-row">
+                <label class="cf-label" for="cf-name">Your name</label>
+                <input class="cf-input" type="text" id="cf-name" name="name" placeholder="Jane Dupont" required>
+              </div>
+              <div class="cf-row">
+                <label class="cf-label" for="cf-email">Email address</label>
+                <input class="cf-input" type="email" id="cf-email" name="email" placeholder="you@example.com" required oninput="document.querySelector('[name=_replyto]').value=this.value">
+              </div>
+              <div class="cf-row">
+                <label class="cf-label" for="cf-topic">Topic</label>
+                <select class="cf-input" id="cf-topic" name="topic" required>
+                  <option value="" disabled selected>Select a topic…</option>
+                  <option value="Contribution / Development">Contribution / Development</option>
+                  <option value="Legal &amp; Regulatory">Legal &amp; Regulatory</option>
+                  <option value="Partnership / Integration">Partnership / Integration</option>
+                  <option value="Testing &amp; UX Feedback">Testing &amp; UX Feedback</option>
+                  <option value="Press / Media">Press / Media</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="cf-row">
+                <label class="cf-label" for="cf-msg">Message</label>
+                <textarea class="cf-input" id="cf-msg" name="message" placeholder="Your message…" required></textarea>
+              </div>
+              <button type="submit" class="cf-submit">Send Message →</button>
+              <p class="cf-notice">Sent to <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="790a0c0909160b0d39180c0d16170014160c0a57141c">[email&#160;protected]</a> · Powered by FormSubmit · No data stored on our servers · Your email is used only to reply to you.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <p class="footer-logo">Autonymous.me</p>
+        <p class="footer-tag">A community protocol for self-sovereign identity. Open source. Non-profit. Built on Holochain. eIDAS 2.0 ready via OpenID4VP.</p>
+        <div class="footer-badge"><span class="oss-pill">Open Source</span> Apache 2.0 License</div>
+        <div class="footer-badge" style="margin-top:.6rem;"><span style="border:1px solid var(--purple);color:var(--purple);padding:3px 8px;font-size:9px;">eIDAS 2.0</span> OpenID4VP · SD-JWT VC · W3C DID</div>
+      </div>
+      <div class="footer-col">
+        <h5>Protocol</h5>
+        <a href="#">Documentation</a><a href="#">Technical specs</a><a href="#">OpenID4VP guide</a><a href="#">DID method</a><a href="#">Roadmap</a>
+      </div>
+      <div class="footer-col">
+        <h5>Community</h5>
+        <a href="#">GitHub</a><a href="#">Forum</a><a href="#">Discord</a><a href="#">Working groups</a><a href="#">Events</a>
+      </div>
+      <div class="footer-col">
+        <h5>Standards</h5>
+        <a href="https://www.w3.org/TR/did-core/" target="_blank" rel="noopener">W3C DID 1.0 — Recommendation</a>
+        <a href="https://www.w3.org/TR/vc-data-model-2.0/" target="_blank" rel="noopener">W3C VC Data Model 2.0</a>
+        <a href="https://openid.net/specs/openid-4-verifiable-presentations-1_0.html" target="_blank" rel="noopener">OpenID4VP v1.0 Final</a>
+        <a href="https://www.rfc-editor.org/rfc/rfc9901.html" target="_blank" rel="noopener">SD-JWT — RFC 9901</a>
+        <a href="https://eur-lex.europa.eu/eli/reg/2024/1183/oj" target="_blank" rel="noopener">eIDAS 2.0 — Reg. (EU) 2024/1183</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="#contact">Send a message</a>
+        <a href="#">GitHub Issues</a>
+        <a href="#">Discord</a>
+      </div>
+      <div class="footer-col">
+        <h5>Privacy &amp; Legal</h5>
+        <a href="#" onclick="openGdpr();return false;">GDPR &amp; Data Policy</a>
+        <a href="#" onclick="openGdpr();return false;">Your Rights</a>
+        <a href="#" onclick="openGdpr();return false;">Data Requests</a>
+        <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener">GDPR Reg. (EU) 2016/679</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 Autonymous.me Community · No rights reserved · Fork freely</p>
+      <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+        <a href="#" onclick="openGdpr();return false;" style="font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.06em;transition:color .2s;" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--muted)'">Privacy &amp; GDPR</a>
+        <p class="footer-did">did:hc:autonymous.me · Holochain Network · v0.4-alpha · OpenID4VP ready</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- GDPR MODAL -->
+<div class="modal-overlay" id="gdpr-modal" onclick="if(event.target===this)closeGdpr()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <p class="modal-eyebrow">Privacy · Data Protection · GDPR</p>
+        <p class="modal-title">Privacy &amp; Data Policy</p>
+      </div>
+      <button class="modal-close" onclick="closeGdpr()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <h3>The short version <span class="ms-tag t">TL;DR</span></h3>
+        <div class="modal-highlight">
+          <p><strong style="color:var(--teal);">Autonymous.me collects zero identity data — by design.</strong> The entire protocol exists to eliminate the need for any party to hold your personal data. Your credentials live on your device only. No server stores your identity, your proofs, or your Source Chain. The only personal data we process at all is what you voluntarily send us via the contact form.</p>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>Data controller <span class="ms-tag a">Identity</span></h3>
+        <p>The data controller for the Autonymous.me project is the community maintainer acting on behalf of the open-source project.</p>
+        <ul>
+          <li><strong>Contact:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="53202623233c2127133226273c3d2a3e3c26207d3e36">[email&#160;protected]</a></li>
+          <li><strong>Project:</strong> Autonymous.me — open source, non-profit, Apache 2.0</li>
+          <li><strong>Jurisdiction:</strong> European Union (GDPR applies)</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>What data is processed <span class="ms-tag t">Data inventory</span></h3>
+
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:.6rem;">Protocol layer — zero data collected</p>
+        <ul>
+          <li><strong>Identity credentials:</strong> Generated and stored exclusively on your device. Never transmitted to any server. Never accessible to Autonymous.me.</li>
+          <li><strong>Verifiable Presentations (VP Tokens):</strong> Sent peer-to-peer between your device and the requesting verifier. Autonymous.me never sees or processes them.</li>
+          <li><strong>Holochain Source Chain:</strong> Stored locally on your device. Replicated only with peers you authorise. Not accessible to us.</li>
+          <li><strong>Cryptographic keys (DIDs):</strong> Generated locally. Private keys never leave your device. Not transmitted to any server.</li>
+          <li><strong>Cookies and trackers:</strong> None. This site sets no cookies, loads no analytics, and makes no third-party tracking calls.</li>
+        </ul>
+
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:.8rem 0 .6rem;">Contact form — limited, voluntary data</p>
+        <ul>
+          <li><strong>Data collected:</strong> Name, email address, topic, and message content — only when you voluntarily submit the contact form.</li>
+          <li><strong>Purpose:</strong> To respond to your message. No marketing. No profiling.</li>
+          <li><strong>Legal basis:</strong> Legitimate interest (Art. 6(1)(f) GDPR) — responding to an inbound request from you.</li>
+          <li><strong>Processor:</strong> FormSubmit.co forwards the form data to our email inbox. FormSubmit does not retain form data beyond transmission.</li>
+          <li><strong>Retention:</strong> Email replies are retained only as long as necessary for the conversation, and deleted on request.</li>
+          <li><strong>No third-party sharing:</strong> Your contact data is never sold, shared with advertisers, or passed to third parties beyond the email delivery chain.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>Your rights under GDPR <span class="ms-tag t">Art. 15–22</span></h3>
+        <p>Under Regulation (EU) 2016/679 (GDPR), you have the following rights regarding any personal data we hold. Because the protocol itself holds no data about you, these rights apply specifically to contact form data processed via email.</p>
+        <div class="modal-rights-grid">
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 15 — Right of access</p>
+            <p class="mr-card-title">Know what we hold</p>
+            <p class="mr-card-desc">You can request a copy of any personal data we hold about you (i.e. your contact emails). We will respond within 30 days.</p>
+          </div>
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 16 — Right to rectification</p>
+            <p class="mr-card-title">Correct your data</p>
+            <p class="mr-card-desc">If any data we hold is inaccurate or incomplete, you can ask us to correct it immediately.</p>
+          </div>
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 17 — Right to erasure</p>
+            <p class="mr-card-title">"Right to be forgotten"</p>
+            <p class="mr-card-desc">You can ask us to delete all contact data we hold about you. We will confirm deletion within 30 days.</p>
+          </div>
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 18 — Right to restriction</p>
+            <p class="mr-card-title">Pause processing</p>
+            <p class="mr-card-desc">You can ask us to restrict processing of your data while a dispute is being resolved.</p>
+          </div>
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 20 — Right to portability</p>
+            <p class="mr-card-title">Export your data</p>
+            <p class="mr-card-desc">You can request your data in a structured, machine-readable format (JSON or CSV). We will provide it within 30 days.</p>
+          </div>
+          <div class="mr-card">
+            <p class="mr-card-label">Art. 21 — Right to object</p>
+            <p class="mr-card-title">Stop processing</p>
+            <p class="mr-card-desc">You can object to processing based on legitimate interest at any time. We will cease processing immediately upon request.</p>
+          </div>
+        </div>
+        <div class="modal-highlight" style="margin-top:1rem;border-left-color:var(--purple);">
+          <p><strong style="color:var(--purple);">Note on the protocol:</strong> Because Autonymous.me stores no identity data on any server, rights of access, portability, and erasure apply automatically — there is nothing to request. Your identity data lives on your device under your sole control. You exercise these rights directly by managing your local wallet.</p>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3>How to exercise your rights <span class="ms-tag a">Contact</span></h3>
+        <p>Send a request to our data contact. We will acknowledge within 72 hours and respond in full within 30 calendar days, free of charge.</p>
+        <div class="modal-contact-box">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="1.5" stroke="#E8A020" stroke-width="1.2"/><path d="M2 5.5l7 5 7-5" stroke="#E8A020" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <div>
+            <a href="/cdn-cgi/l/email-protection#89fafcf9f9e6fbfdc9e8fcfde6e7f0e4e6fcfaa7e4ecb6fafcebe3eceafdb4cecdd9dbacbbb9cde8fde8acbbb9dbecf8fcecfafd"><span class="__cf_email__" data-cfemail="b1c2c4c1c1dec3c5f1d0c4c5dedfc8dcdec4c29fdcd4">[email&#160;protected]</span></a>
+            <p>Subject line: "GDPR Data Request — [your right]". Include your full name and the email address used to contact us.</p>
+          </div>
+        </div>
+        <p style="margin-top:1rem;">If you believe your rights have not been respected, you have the right to lodge a complaint with your national supervisory authority. In France: <a href="https://www.cnil.fr" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">CNIL (cnil.fr)</a>. Full list: <a href="https://edpb.europa.eu/about-edpb/about-edpb/members_en" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">EDPB members</a>.</p>
+      </div>
+
+      <div class="modal-section">
+        <h3>Privacy by design <span class="ms-tag t">Architecture</span></h3>
+        <p>Autonymous.me is built so that privacy is not a policy choice — it is a structural impossibility to violate. The architecture enforces data minimisation (Art. 5(1)(c) GDPR) and purpose limitation (Art. 5(1)(b) GDPR) at the cryptographic level:</p>
+        <ul>
+          <li><strong>Data minimisation:</strong> Zero-knowledge proofs ensure only a boolean result is transmitted — never the underlying attribute value.</li>
+          <li><strong>Storage limitation:</strong> No server stores any identity data. There is no database to breach.</li>
+          <li><strong>Integrity and confidentiality:</strong> All credentials are cryptographically signed by issuers and encrypted at rest on the user's device.</li>
+          <li><strong>Accountability:</strong> Every verification action is logged on the user's own immutable Source Chain — under the user's sole control.</li>
+          <li><strong>Unlinkability:</strong> Context-specific DIDs prevent correlation across services. No persistent identifier is ever shared with a verifier.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>External processors <span class="ms-tag a">Third parties</span></h3>
+        <ul>
+          <li><strong>FormSubmit.co</strong> — processes contact form submissions for delivery to our inbox. Subject to their own privacy policy. No data retained after delivery.</li>
+          <li><strong>No analytics:</strong> No Google Analytics, no Plausible, no Matomo, no pixel trackers of any kind.</li>
+          <li><strong>No CDN dependencies:</strong> This site is fully self-contained. No third-party scripts are loaded at runtime.</li>
+        </ul>
+      </div>
+
+      <p class="modal-updated">Last updated: January 2025 · This policy will be updated when the project structure changes materially. Changes will be announced in the GitHub repository changelog. · <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:none;">GDPR Reg. (EU) 2016/679</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+var sourceChain = [];
+
+/* Section collapse toggles */
+window.toggleSection = function(id) {
+  var body = document.getElementById('sec-' + id + '-body');
+  var btn  = document.getElementById('sec-' + id + '-btn');
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  btn.textContent    = open ? '+' : '−';
+  btn.classList.toggle('open', !open);
+  if (!open) {
+    body.querySelectorAll('.reveal').forEach(function(el) {
+      el.classList.remove('on');
+      setTimeout(function() { el.classList.add('on'); }, 60);
+    });
+  }
+};
+
+/* FAQ */
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){
+    var item=q.parentElement, wasOpen=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(function(i){i.classList.remove('open');});
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+
+/* Reveal */
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});},{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+
+/* Active nav */
+var allSec=document.querySelectorAll('[id]'), allLinks=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',function(){
+  var cur='';
+  allSec.forEach(function(s){if(window.scrollY>=s.offsetTop-80)cur=s.id;});
+  allLinks.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+},{passive:true});
+
+/* Tab switch */
+function switchTab(tab,btn){
+  document.querySelectorAll('.demo-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.demo-tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('pane-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* Toggle */
+function toggleField(el){el.classList.toggle('off');}
+
+/* Simple demo */
+function approveSimple(){
+  var now=new Date(), ts=now.toISOString().replace('T',' ').slice(0,19)+' UTC';
+  var age=!document.getElementById('tog-age').classList.contains('off');
+  var country=!document.getElementById('tog-country').classList.contains('off');
+  var name=!document.getElementById('tog-name').classList.contains('off');
+  var dob=!document.getElementById('tog-dob').classList.contains('off');
+  var addr=!document.getElementById('tog-addr').classList.contains('off');
+  document.getElementById('p-age').textContent     = age     ? 'TRUE (≥ 18)'          : '— [not disclosed]';
+  document.getElementById('p-country').textContent = country ? '"France" (verified)'  : '— [not disclosed]';
+  document.getElementById('p-name').textContent    = name    ? '"J. Dupont"'           : '— [not disclosed]';
+  document.getElementById('p-dob').textContent     = dob     ? '"1991-04-12"'          : '— [not disclosed]';
+  document.getElementById('p-addr').textContent    = addr    ? '"Paris 75001"'         : '— [not disclosed]';
+  document.getElementById('p-ts').textContent = ts;
+  document.getElementById('proof-waiting').style.display='none';
+  document.getElementById('proof-denied').classList.remove('show');
+  document.getElementById('proof-ok').classList.add('show');
+  addToChain('proof','ZK Proof presented to OpenVote Platform','QmZK'+rnd());
+}
+function denySimple(){
+  document.getElementById('proof-waiting').style.display='none';
+  document.getElementById('proof-ok').classList.remove('show');
+  document.getElementById('proof-denied').classList.add('show');
+}
+
+/* Utils */
+var nonce='';
+function rnd(){return Math.random().toString(36).substring(2,10);}
+
+/* OpenID4VP */
+function generateQRRequest(){
+  nonce=rnd()+rnd();
+  var uri='openid4vp://?request_uri=https://bankx.eudi.example/vp-request&client_id=bank-x.eudi.example&nonce='+nonce+'&response_type=vp_token&response_mode=direct_post&format=dc%2Bsd-jwt';
+  document.getElementById('qr-uri-text').textContent=uri;
+  document.getElementById('nonce-val').textContent=nonce;
+  document.getElementById('qr-section').style.display='block';
+  document.getElementById('step1-meta').style.display='block';
+  drawQR(uri);
+  document.getElementById('btn-scan').disabled=false;
+  document.getElementById('btn-genqr').textContent='✓ Request generated';
+  document.getElementById('btn-genqr').style.opacity='.55';
+}
+
+function drawQR(text){
+  var canvas=document.getElementById('qrCanvas'), ctx=canvas.getContext('2d'), size=180;
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size); ctx.fillStyle='#000';
+  var seed=0;
+  for(var i=0;i<text.length;i++) seed=((seed<<5)-seed)+text.charCodeAt(i);
+  function sr(){seed=(seed*1664525+1013904223)&0xffffffff; return(seed>>>0)/0xffffffff;}
+  var c=7;
+  function finder(ox,oy){
+    ctx.fillStyle='#000'; ctx.fillRect(ox,oy,7*c,7*c);
+    ctx.fillStyle='#fff'; ctx.fillRect(ox+c,oy+c,5*c,5*c);
+    ctx.fillStyle='#000'; ctx.fillRect(ox+2*c,oy+2*c,3*c,3*c);
+  }
+  finder(0,0); finder(size-7*c,0); finder(0,size-7*c);
+  for(var r=0;r<25;r++) for(var col=0;col<25;col++){
+    if((r<9&&col<9)||(r<9&&col>15)||(r>15&&col<9)) continue;
+    if(sr()>0.45){ctx.fillStyle='#000'; ctx.fillRect(col*c,r*c,c-1,c-1);}
+  }
+  ctx.fillStyle='#7B68EE'; ctx.fillRect(76,76,28,28);
+  ctx.fillStyle='#fff'; ctx.font='bold 16px Arial'; ctx.textAlign='center'; ctx.fillText('A',90,94);
+}
+
+function simulateScan(){
+  document.getElementById('oidc-claim-panel').style.display='block';
+  document.getElementById('btn-scan').textContent='✓ QR scanned';
+  document.getElementById('btn-scan').disabled=true;
+}
+
+function approveAndPresent(){
+  var age=!document.getElementById('oc-age').classList.contains('off');
+  var country=!document.getElementById('oc-country').classList.contains('off');
+  var name=!document.getElementById('oc-name').classList.contains('off');
+  var dob=!document.getElementById('oc-dob').classList.contains('off');
+
+  /* Build SD-JWT structure */
+  var disclosures=[], sd_hashes=[];
+  function addClaim(k,v,selected){
+    var salt=rnd();
+    var d=btoa(JSON.stringify([salt,k,v])).replace(/=/g,'');
+    if(selected){disclosures.push(d); sd_hashes.push('"'+btoa(k+':'+salt).replace(/=/g,'').substring(0,22)+'"');}
+  }
+  addClaim('age_gte_18',true,age);
+  addClaim('country','FR',country);
+  addClaim('name','J. Dupont',name);
+  addClaim('birth_date','1991-04-12',dob);
+
+  var hdr=btoa(JSON.stringify({alg:'ES256',typ:'dc+sd-jwt'})).replace(/=/g,'');
+  var pay=btoa(JSON.stringify({
+    iss:'did:hc:uhCAkMinistryOfInterior',
+    sub:'did:hc:uhCAkHolder'+rnd(),
+    nonce:nonce,
+    _sd:sd_hashes,
+    _sd_alg:'sha-256',
+    iat:Math.floor(Date.now()/1000),
+    exp:Math.floor(Date.now()/1000)+600
+  })).replace(/=/g,'');
+  var sig=rnd()+rnd()+rnd();
+  var vpToken=hdr+'.'+pay+'.'+sig;
+  if(disclosures.length) vpToken+='~'+disclosures.join('~')+'~';
+
+  var claimed=[], hidden=[];
+  if(age)     claimed.push('age_gte_18: TRUE');     else hidden.push('age_gte_18');
+  if(country) claimed.push('country: "FR"');         else hidden.push('country');
+  if(name)    claimed.push('name: "J. Dupont"');     else hidden.push('name');
+  if(dob)     claimed.push('birth_date: "1991-04-12"'); else hidden.push('birth_date');
+
+  var ts=new Date().toISOString().replace('T',' ').slice(0,19)+' UTC';
+  var html=
+    '<span class="jwt-h">// HEADER</span>\n{"alg":"ES256","typ":"dc+sd-jwt"}\n\n'+
+    '<span class="jwt-p">// PAYLOAD · selective disclosures</span>\n{\n'+
+    '  "iss": "did:hc:uhCAkMinistryOfInterior",\n'+
+    '  "nonce": "'+nonce.substring(0,16)+'...",\n'+
+    '  "_sd_alg": "sha-256",\n'+
+    '  "_sd": ['+sd_hashes.slice(0,3).join(', ')+(sd_hashes.length>3?', ...':'')+'],\n'+
+    '  "iat": '+Math.floor(Date.now()/1000)+',\n  "exp": '+Math.floor(Date.now()/1000+600)+'\n}\n\n'+
+    '<span class="jwt-s">// DISCLOSED CLAIMS</span>\n'+
+    (claimed.length?claimed.map(function(c){return'  ✓ '+c;}).join('\n'):'  (none — no claims selected)')+'\n\n'+
+    (hidden.length?'<span class="jwt-meta">// UNDISCLOSED (hash present, value absent)\n  '+hidden.join(', ')+'</span>\n\n':'')+
+    '<span class="jwt-ok">✓ VP Token (dc+sd-jwt) presented to Bank X (eIDAS 2.0)</span>\n'+
+    '<span class="jwt-meta">Format: dc+sd-jwt · Holder binding: OK · Nonce: verified\nTimestamp: '+ts+'</span>';
+
+  document.getElementById('jwt-waiting').style.display='none';
+  var box=document.getElementById('jwt-result');
+  box.innerHTML=html; box.classList.add('show');
+  document.getElementById('sc-notice').style.display='block';
+
+  addToChain('vp',
+    'OpenID4VP VP Token presented to Bank X (eIDAS 2.0) · Disclosed: '+(claimed.length?claimed.map(function(c){return c.split(':')[0].trim();}).join(', '):'none'),
+    'QmVP'+rnd()
+  );
+}
+
+/* Source Chain */
+function addToChain(type,desc,hash){
+  var ts=new Date().toISOString().replace('T',' ').slice(0,19);
+  sourceChain.unshift({type:type,desc:desc,hash:hash,ts:ts});
+  renderChain();
+}
+function renderChain(){
+  var container=document.getElementById('sc-dynamic');
+  if(!sourceChain.length){container.innerHTML='<div class="sc-empty">Run the OpenID4VP demo above to add entries to your Source Chain.</div>';return;}
+  var labels={vp:'OpenID4VP',cred:'VC Import',proof:'ZK Proof',did:'DID Action'};
+  container.innerHTML=sourceChain.map(function(e){
+    return '<div class="sc-entry t-'+e.type+'">'
+      +'<div class="sc-hash">'+e.hash.substring(0,12)+'...</div>'
+      +'<div class="sc-body"><span class="sc-type '+e.type+'">'+labels[e.type]+'</span>'
+      +'<p class="sc-desc">'+e.desc+'</p>'
+      +'<p class="sc-time">'+e.ts+'</p></div></div>';
+  }).join('');
+}
+
+/* Problem section toggle */
+window.toggleProblem = function(){
+  var d   = document.getElementById('prob-details');
+  var btn = document.getElementById('prob-toggle-btn');
+  var ico = document.getElementById('prob-toggle-icon');
+  var open = d.style.display === 'block';
+  d.style.display = open ? 'none' : 'block';
+  ico.textContent  = open ? '+' : '−';
+  btn.style.borderColor = open ? 'var(--amber)' : 'var(--teal)';
+  btn.style.color       = open ? 'var(--amber)' : 'var(--teal)';
+  btn.setAttribute('aria-expanded', String(!open));
+  if(!open){
+    // re-trigger reveal animations on newly visible elements
+    document.querySelectorAll('#prob-details .reveal').forEach(function(el){
+      el.classList.remove('on');
+      setTimeout(function(){ el.classList.add('on'); }, 60);
+    });
+  }
+};
+
+/* GDPR modal */
+function openGdpr(){
+  var m=document.getElementById('gdpr-modal');
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeGdpr(){
+  var m=document.getElementById('gdpr-modal');
+  m.classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeGdpr(); });
+
+/* Contact form */
+function handleFormSubmit(e){
+  e.preventDefault();
+  var form = document.getElementById('contact-form');
+  var btn  = form.querySelector('.cf-submit');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  var data = new FormData(form);
+  fetch(form.action, {method:'POST', body:data, headers:{Accept:'application/json'}})
+    .then(function(r){
+      document.getElementById('contact-form').style.display = 'none';
+      document.getElementById('cf-success').style.display = 'block';
+    })
+    .catch(function(){
+      btn.textContent = 'Send Message →';
+      btn.disabled = false;
+      alert('Something went wrong. Please email support@autonymous.me directly.');
+    });
+}
+
+/* ── hApp flow diagram ── */
+var flowSteps = [
+  {
+    title: 'Step 1 · Credential issuance',
+    desc: 'The issuer (a government ministry, a bank, a university) signs a Verifiable Credential in SD-JWT format and delivers it directly to the user\'s wallet. The credential is encrypted and stored locally on the user\'s device. The issuer keeps no copy and has no visibility into future use of the credential.',
+    tags: ['SD-JWT VC', 'W3C VC 2.0', 'One-way delivery', 'No issuer tracking'],
+    arrowIW: { active: true, color: '#E8A020', label: 'SD-JWT VC' },
+    arrowWV: { active: false, color: '#7A8A99', label: '—' },
+    holochain: 'Issuer registry on DHT lets the wallet verify the issuer\'s DID and public key without contacting the issuer directly.',
+    issuer: `<div style="margin-bottom:10px;"><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px;">Credential being signed</p><div style="background:var(--bg3);padding:10px;border:0.5px solid var(--border);"><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">type: <span style="color:var(--text);">IdentityCredential</span></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">iss: <span style="color:var(--amber);">did:hc:uhCAkMinistry...</span></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;">format: <span style="color:var(--teal);">dc+sd-jwt</span></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);">_sd_alg: <span style="color:var(--text);">sha-256</span></div></div></div><div style="margin-top:8px;padding:8px;background:rgba(232,160,32,.07);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">✓ Signed with issuer private key<br>✓ No copy retained after delivery</div>`,
+    wallet: `<div style="margin-bottom:8px;"><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">Receiving credential…</p><div style="background:var(--bg3);padding:8px;border:0.5px solid var(--border2);"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:14px;">🪪</span><div><div style="font-size:12px;font-weight:500;color:var(--text);">National ID · FR</div><div style="font-family:var(--mono);font-size:9px;color:var(--teal);">✓ Signature verified</div></div></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);">Stored encrypted locally<br>Private key: never leaves device</div></div></div>`,
+    verifier: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">⏳</div><p style="font-size:11px;font-family:var(--mono);">Not involved at this stage</p></div>`
+  },
+  {
+    title: 'Step 2 · Verification request (OpenID4VP)',
+    desc: 'The verifier generates a signed OpenID4VP authorization request containing a nonce, a response_type of vp_token, and a presentation_definition specifying which credential types are required. This request is encoded as a QR code or deep link — no personal data is sent at this stage.',
+    tags: ['OpenID4VP', 'QR / deep link', 'Nonce prevents replay', 'No data to verifier yet'],
+    arrowIW: { active: false, color: '#7A8A99', label: '—' },
+    arrowWV: { active: true, color: '#7B68EE', label: 'OID4VP request', reverse: true },
+    holochain: 'Verifier\'s DID is looked up on the DHT to confirm it is a registered, trusted relying party before the wallet processes the request.',
+    issuer: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">✓</div><p style="font-size:11px;font-family:var(--mono);">Credential already issued.<br>Issuer not involved.</p></div>`,
+    wallet: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:6px;">QR scanned — request parsed</p><div style="background:var(--bg3);padding:8px;border:0.5px solid var(--border3);margin-bottom:8px;"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">client_id: <span style="color:var(--text);">bank-x.eudi.example</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">nonce: <span style="color:var(--purple);">a3f9c2e1...</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);">format: <span style="color:var(--teal);">dc+sd-jwt</span></div></div><div style="padding:6px 8px;background:rgba(0,201,167,.07);border:0.5px solid var(--border2);font-size:11px;color:var(--muted);">✓ Verifier DID verified on DHT<br>✓ No data sent yet</div></div>`,
+    verifier: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:6px;">Request sent</p><div style="background:var(--bg3);padding:8px;border:0.5px solid var(--border3);"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">response_type: <span style="color:var(--text);">vp_token</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">response_mode: <span style="color:var(--text);">direct_post</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);">required: <span style="color:var(--text);">age_gte_18, country</span></div></div><div style="margin-top:6px;font-size:11px;color:var(--muted);">Awaiting wallet response…</div></div>`
+  },
+  {
+    title: 'Step 3 · Selective disclosure — user chooses what to share',
+    desc: 'The user\'s wallet presents the matching credentials and prompts the user to select which specific SD-JWT claims to disclose. Only the selected claims are hashed into the VP Token. Unselected claims are provably absent — not merely omitted. The user retains complete control over what the verifier sees.',
+    tags: ['Selective disclosure', 'User consent', 'Zero-knowledge', 'Unlinkable DID'],
+    arrowIW: { active: false, color: '#7A8A99', label: '—' },
+    arrowWV: { active: false, color: '#7A8A99', label: 'selecting…' },
+    holochain: 'The wallet generates a fresh context-specific DID for this session. The Holochain DHT is not involved — this step runs fully offline on the user\'s device.',
+    issuer: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">✓</div><p style="font-size:11px;font-family:var(--mono);">Not involved.<br>Cannot see what user shares.</p></div>`,
+    wallet: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px;">Select claims to disclose</p><div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span>Age ≥ 18</span><span style="width:28px;height:14px;background:var(--teal);border-radius:7px;display:inline-block;position:relative;"><span style="position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#fff;"></span></span></div><div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px;"><span>Country</span><span style="width:28px;height:14px;background:var(--teal);border-radius:7px;display:inline-block;position:relative;"><span style="position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#fff;"></span></span></div><div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;"><span style="color:var(--muted);">Full name</span><span style="width:28px;height:14px;background:rgba(122,138,153,.3);border-radius:7px;display:inline-block;position:relative;"><span style="position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#fff;"></span></span></div></div><div style="font-size:11px;color:var(--muted);padding:6px 8px;background:rgba(232,160,32,.06);border:0.5px solid var(--border);">Full name stays hidden.<br>Only boolean proofs transmitted.</div></div>`,
+    verifier: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">⏳</div><p style="font-size:11px;font-family:var(--mono);">Waiting for wallet…<br>No data received yet.</p></div>`
+  },
+  {
+    title: 'Step 4 · VP Token delivery and verification',
+    desc: 'The wallet sends a VP Token (dc+sd-jwt format) to the verifier via direct_post. The token contains only the selected claims as cryptographic hash disclosures. The verifier checks the issuer signature, the nonce, and the holder binding — then grants access. No personal data is stored.',
+    tags: ['dc+sd-jwt VP Token', 'Holder binding', 'Nonce verified', 'No data retained'],
+    arrowIW: { active: false, color: '#7A8A99', label: '—' },
+    arrowWV: { active: true, color: '#7B68EE', label: 'VP Token' },
+    holochain: 'The verifier resolves the issuer DID on the DHT to retrieve the public key and verify the credential signature — without contacting the issuer directly.',
+    issuer: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">✓</div><p style="font-size:11px;font-family:var(--mono);">Not involved.<br>Signature already embedded.</p></div>`,
+    wallet: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">VP Token sent</p><div style="background:var(--bg3);padding:8px;border:0.5px solid var(--border2);font-family:var(--mono);font-size:9px;word-break:break-all;color:var(--muted);margin-bottom:6px;"><span style="color:var(--amber);">eyJhbGci...</span>.<span style="color:var(--teal);">eyJpc3Mi...</span>.<span style="color:var(--purple);">sig...</span>~<span style="color:var(--text);">WyJzYWx0Ii...</span>~</div><div style="font-size:11px;color:var(--muted);">Logged to Source Chain →</div></div>`,
+    verifier: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;">✓ Verification passed</p><div style="background:var(--bg3);padding:8px;border:0.5px solid var(--border2);margin-bottom:6px;"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">age_gte_18: <span style="color:var(--teal);">TRUE</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">country: <span style="color:var(--teal);">"FR"</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;">full_name: <span style="color:var(--muted);">— not disclosed</span></div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);">data_stored: <span style="color:#e74c3c;">NONE</span></div></div><div style="font-size:11px;color:var(--muted);">Access granted. No record kept.</div></div>`
+  },
+  {
+    title: 'Step 5 · Holochain Source Chain — immutable audit log',
+    desc: 'Every action — credential import, OpenID4VP presentation, DID rotation — is automatically logged as a hash-linked entry on the user\'s personal Holochain Source Chain. The chain lives on the user\'s device. Any attempt to alter or delete an entry invalidates all subsequent hashes and is immediately detectable by peers. No server holds this log.',
+    tags: ['Immutable audit', 'Hash-linked', 'User-controlled', 'Peer-validated', 'Beyond eIDAS'],
+    arrowIW: { active: false, color: '#7A8A99', label: '—' },
+    arrowWV: { active: false, color: '#7A8A99', label: '—' },
+    holochain: 'Source Chain entries are validated by neighbouring peers using shared application rules (DNA). No peer can alter your chain. Removing any peer from the network does not affect your chain or any other peer\'s chain.',
+    issuer: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">✓</div><p style="font-size:11px;font-family:var(--mono);">Not involved.<br>Cannot see your Source Chain.</p></div>`,
+    wallet: `<div><p style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px;">Source Chain — last entries</p><div><div style="display:flex;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:11px;"><span style="font-family:var(--mono);color:var(--muted);font-size:9px;width:70px;flex-shrink:0;">QmVP9f3a...</span><span style="font-family:var(--mono);font-size:9px;padding:1px 6px;border:1px solid var(--purple);color:var(--purple);">OpenID4VP</span><span style="font-size:11px;color:var(--muted);margin-left:4px;">Presented to Bank X</span></div><div style="display:flex;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:11px;"><span style="font-family:var(--mono);color:var(--muted);font-size:9px;width:70px;flex-shrink:0;">QmE9k3n2...</span><span style="font-family:var(--mono);font-size:9px;padding:1px 6px;border:1px solid var(--teal);color:var(--teal);">VC Import</span><span style="font-size:11px;color:var(--muted);margin-left:4px;">National ID imported</span></div><div style="display:flex;gap:8px;padding:5px 0;font-size:11px;"><span style="font-family:var(--mono);color:var(--muted);font-size:9px;width:70px;flex-shrink:0;">Qm3xG9a1...</span><span style="font-family:var(--mono);font-size:9px;padding:1px 6px;border:1px solid var(--amber);color:var(--amber);">DID Init</span><span style="font-size:11px;color:var(--muted);margin-left:4px;">Genesis entry</span></div></div><div style="margin-top:6px;font-size:11px;color:var(--muted);font-family:var(--mono);">Each entry ← hash of previous</div></div>`,
+    verifier: `<div style="text-align:center;padding:1.4rem .8rem;color:var(--muted);"><div style="font-size:20px;margin-bottom:.5rem;">✓</div><p style="font-size:11px;font-family:var(--mono);">Not involved.<br>Cannot see Source Chain.</p></div>`
+  }
+];
+
+var currentFlowStep = 0;
+
+function setFlowStep(n) {
+  currentFlowStep = n;
+  var s = flowSteps[n];
+
+  document.querySelectorAll('.flow-step-btn').forEach(function(btn, i) {
+    var active = i === n;
+    btn.style.background = active ? 'var(--bg)' : 'var(--bg3)';
+    btn.style.color = active ? (i < 2 ? 'var(--amber)' : i < 4 ? 'var(--purple)' : 'var(--teal)') : 'var(--muted)';
+    btn.style.borderTop = active ? ('2px solid ' + (i < 2 ? 'var(--amber)' : i < 4 ? 'var(--purple)' : 'var(--teal)')) : '2px solid transparent';
+  });
+
+  document.getElementById('issuer-body').innerHTML = s.issuer;
+  document.getElementById('wallet-body').innerHTML = s.wallet;
+  document.getElementById('verifier-body').innerHTML = s.verifier;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  document.getElementById('holochain-desc').textContent = s.holochain;
+
+  var tags = document.getElementById('step-tags');
+  tags.innerHTML = s.tags.map(function(t) {
+    var isBeyond = t === 'Beyond eIDAS';
+    return '<span style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border:1px solid '+(isBeyond?'var(--purple)':'var(--border)')+';color:'+(isBeyond?'var(--purple)':'var(--muted)')+';">'+t+'</span>';
+  }).join('');
+
+  var aiw = s.arrowIW;
+  var awv = s.arrowWV;
+  var iwLine = document.getElementById('arrow-iw-line');
+  var wvLine = document.getElementById('arrow-wv-line');
+  var iwLabel = document.getElementById('arrow-iw-label');
+  var wvLabel = document.getElementById('arrow-wv-label');
+
+  iwLine.style.background = aiw.active ? aiw.color : 'rgba(122,138,153,.15)';
+  iwLabel.textContent = aiw.label;
+  iwLabel.style.color = aiw.active ? aiw.color : 'var(--muted)';
+
+  wvLine.style.background = awv.active ? awv.color : 'rgba(122,138,153,.15)';
+  wvLabel.textContent = awv.label;
+  wvLabel.style.color = awv.active ? awv.color : 'var(--muted)';
+
+  var iwDot = document.getElementById('arrow-iw-dot');
+  var wvDot = document.getElementById('arrow-wv-dot');
+  if(aiw.active) { animateDot(iwDot, aiw.color); } else { iwDot.style.opacity = '0'; }
+  if(awv.active) { animateDot(wvDot, awv.color); } else { wvDot.style.opacity = '0'; }
+
+  renderHolochainNodes(n);
+}
+
+function animateDot(dot, color) {
+  dot.style.background = color;
+  dot.style.opacity = '1';
+  dot.style.top = '0%';
+  setTimeout(function() { dot.style.top = '90%'; }, 50);
+  setTimeout(function() { dot.style.opacity = '0'; dot.style.top = '0%'; }, 700);
+  setTimeout(function() { dot.style.opacity = '1'; animateDot(dot, color); }, 1000);
+}
+
+function renderHolochainNodes(step) {
+  var container = document.getElementById('holochain-nodes');
+  var nodeCount = 7;
+  var activeNodes = step === 4 ? [0,1,2,3,4,5,6] : step === 0 ? [2,5] : step === 1 ? [3,4] : step === 3 ? [3,6] : [];
+  var html = '';
+  for(var i=0;i<nodeCount;i++){
+    var isUser = i===2;
+    var isActive = activeNodes.indexOf(i) >= 0;
+    var color = isUser ? 'var(--amber)' : isActive ? 'var(--teal)' : 'rgba(122,138,153,.3)';
+    html += '<div style="width:10px;height:10px;border-radius:50%;background:'+color+';transition:background .4s;"'+(isUser?' title="Your device"':'')+' ></div>';
+    if(i<nodeCount-1) html += '<div style="width:10px;height:1px;background:rgba(0,201,167,.2);"></div>';
+  }
+  container.innerHTML = '<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">Peers:</span>' + html;
+}
+
+setFlowStep(0);
+
+window.toggleHappDiagram = function(){
+  var d=document.getElementById('happ-diagram');
+  var a=document.getElementById('happ-diag-arrow');
+  var open=d.style.display==='block';
+  d.style.display=open?'none':'block';
+  a.textContent=open?'▶':'▼';
+}
+
+function clearChain(){
+  sourceChain=[];
+  renderChain();
+  document.getElementById('btn-genqr').textContent='Generate OpenID4VP Request';
+  document.getElementById('btn-genqr').style.opacity='1';
+  document.getElementById('btn-scan').disabled=true;
+  document.getElementById('btn-scan').textContent='Scan QR Code';
+  document.getElementById('qr-section').style.display='none';
+  document.getElementById('step1-meta').style.display='none';
+  document.getElementById('oidc-claim-panel').style.display='none';
+  document.getElementById('jwt-waiting').style.display='block';
+  document.getElementById('jwt-result').classList.remove('show');
+  document.getElementById('sc-notice').style.display='none';
+  ['oc-age','oc-country'].forEach(function(id){document.getElementById(id).classList.remove('off');});
+  ['oc-name','oc-dob'].forEach(function(id){document.getElementById(id).classList.add('off');});
+  document.getElementById('proof-waiting').style.display='block';
+  document.getElementById('proof-ok').classList.remove('show');
+  document.getElementById('proof-denied').classList.remove('show');
+}
+</script>
+</body>
+</html>
