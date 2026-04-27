@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1800" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="1960" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ═══════════════════════════════════════════ TITLE ═══════════════════════════════════════════ -->
+    <mxCell id="title" value="AUTONYMOUS.ME — Full Architecture: Front-end · Back-end · Protocol Stack · Network (v0.4-alpha)"
+      style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontFamily=Arial Black;fontSize=18;fontStyle=1;fontColor=#E8A020;"
+      vertex="1" parent="1">
+      <mxGeometry x="100" y="12" width="2200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="subtitle" value="No central server · No data broker · All credential logic runs locally · Peer-to-peer Holochain network"
+      style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontFamily=Courier New;fontSize=10;fontColor=#7A8A99;"
+      vertex="1" parent="1">
+      <mxGeometry x="100" y="48" width="2200" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════ ZONE 1 — EXTERNAL ACTORS ═══════════════════════════════════════════ -->
+    <mxCell id="z_ext_bg" value=""
+      style="rounded=0;fillColor=#0d0820;strokeColor=#7B68EE;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="2320" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="z_ext_lbl" value="EXTERNAL ACTORS"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#7B68EE;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="56" y="84" width="220" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_issuer" value="&lt;b&gt;Government Issuer&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Trust Service Provider&lt;br/&gt;eIDAS 2.0 Accredited&lt;br/&gt;Issues SD-JWT credentials&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;strokeWidth=2;fontColor=#EAE6DC;fontSize=12;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="70" y="105" width="290" height="125" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_eudi" value="&lt;b&gt;EUDI Wallet Bridge&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;EU Digital Identity Wallet&lt;br/&gt;Phase 6 — Planned 2026&lt;br/&gt;ISO/IEC 18013-5 mDL&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;strokeWidth=1;dashed=1;fontColor=#7A8A99;fontSize=12;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1055" y="105" width="290" height="125" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_verifier" value="&lt;b&gt;Verifier / Relying Party&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Bank · Airline · Gov Portal&lt;br/&gt;Sends OpenID4VP Request&lt;br/&gt;Receives VP Token response&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;strokeWidth=2;fontColor=#EAE6DC;fontSize=12;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="2040" y="105" width="290" height="125" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════ ZONE 2 — FRONT-END ═══════════════════════════════════════════ -->
+    <mxCell id="z_fe_bg" value=""
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="285" width="2320" height="275" as="geometry"/>
+    </mxCell>
+    <mxCell id="z_fe_lbl" value="FRONT-END — Autonymous.me hApp UI  ·  Single self-contained HTML/JS  ·  No external dependencies  ·  Runs 100% locally"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#00C9A7;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="56" y="289" width="800" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_nav" value="&lt;b&gt;Navigation Bar&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;How it Works&lt;br/&gt;Architecture · Demo&lt;br/&gt;OpenID4VP · Roadmap&lt;br/&gt;Contact&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="65" y="315" width="220" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_idcard" value="&lt;b&gt;DID Identity Card Widget&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;did:hc:uhCAk... display&lt;br/&gt;Verified attributes&lt;br/&gt;Hidden/disclosed toggle&lt;br/&gt;eIDAS 2.0 badge&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;strokeWidth=1.5;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="305" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_oidc" value="&lt;b&gt;OpenID4VP Demo UI&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Step 1 — Scan QR code&lt;br/&gt;Step 2 — Select claims&lt;br/&gt;Step 3 — Approve &amp; send&lt;br/&gt;Interactive flow simulator&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7B68EE;strokeWidth=1.5;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="575" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_claim" value="&lt;b&gt;SD-JWT Claim Selector&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Per-claim toggle UI&lt;br/&gt;Age / Name / Address&lt;br/&gt;ZK proof option&lt;br/&gt;Minimal disclosure&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="845" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_sc_view" value="&lt;b&gt;Source Chain Viewer&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Immutable audit log UI&lt;br/&gt;DID · Cred · VP entries&lt;br/&gt;Hash + Timestamp&lt;br/&gt;Tamper-proof display&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1115" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_vp_disp" value="&lt;b&gt;VP Token Display&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;dc+sd-jwt viewer&lt;br/&gt;Header · Payload · Sig&lt;br/&gt;Decoded claims panel&lt;br/&gt;eIDAS 2.0 status&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1385" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_arch_ui" value="&lt;b&gt;Architecture / Use Cases UI&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;6-layer stack diagram&lt;br/&gt;4 use case cards&lt;br/&gt;Roadmap Phase 1–6&lt;br/&gt;Community section&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1655" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fe_contact" value="&lt;b&gt;Contact / GDPR Modal&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Privacy policy overlay&lt;br/&gt;No server-side storage&lt;br/&gt;User rights display&lt;br/&gt;Support form&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1925" y="315" width="250" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- FE sub-label -->
+    <mxCell id="fe_sublabel" value="← Scroll-reveal animations  ·  Intersection Observer  ·  Section collapse toggles  ·  Tab panels  ·  No framework  ·  Vanilla JS + CSS →"
+      style="text;html=1;align=center;fontFamily=Courier New;fontSize=9;fontColor=#7A8A99;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="56" y="460" width="2290" height="18" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════ ZONE 3 — BACK-END ═══════════════════════════════════════════ -->
+    <mxCell id="z_be_bg" value=""
+      style="rounded=0;fillColor=#040C18;strokeColor=#E8A020;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="595" width="2320" height="990" as="geometry"/>
+    </mxCell>
+    <mxCell id="z_be_lbl" value="BACK-END — Autonymous.me hApp Core  ·  All Local — Zero Central Server  ·  Apache 2.0"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#E8A020;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="56" y="599" width="700" height="16" as="geometry"/>
+    </mxCell>
+
+    <!-- ─── L6: Protocol Layer ─── -->
+    <mxCell id="l6_bg" value=""
+      style="rounded=0;fillColor=#0d0820;strokeColor=#7B68EE;strokeWidth=1.5;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="622" width="2285" height="175" as="geometry"/>
+    </mxCell>
+    <mxCell id="l6_lbl" value="L6 — OpenID4VP PROTOCOL LAYER  ·  eIDAS 2.0  ·  Authorization Request → VP Token → Response"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#7B68EE;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="76" y="625" width="700" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_parser" value="&lt;b&gt;Auth Request Parser&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;QR / deep-link decode&lt;br/&gt;presentation_definition&lt;br/&gt;client_id · nonce&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_inputdesc" value="&lt;b&gt;Input Descriptor Resolver&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Match VCs to request&lt;br/&gt;Claim filtering&lt;br/&gt;Format negotiation&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="380" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_holder" value="&lt;b&gt;Holder Binding Engine&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Signs VP with DID key&lt;br/&gt;kb-jwt construction&lt;br/&gt;Nonce binding&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="680" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_vp_asm" value="&lt;b&gt;VP Token Assembler&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;dc+sd-jwt format&lt;br/&gt;W3C VP 2.0 wrapper&lt;br/&gt;Selected ~ disclosures&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="980" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_resp" value="&lt;b&gt;Response Transmitter&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;HTTPS POST redirect_uri&lt;br/&gt;direct_post response&lt;br/&gt;vp_token field&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1280" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_eidas" value="&lt;b&gt;eIDAS 2.0 Validator&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Reg (EU) 2024/1183&lt;br/&gt;Compliance checks&lt;br/&gt;Format conformance&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1580" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l6_nonce" value="&lt;b&gt;Nonce / State Manager&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Replay prevention&lt;br/&gt;Session state (local)&lt;br/&gt;state · nonce binding&lt;/font&gt;"
+      style="rounded=0;fillColor=#1a0d30;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1880" y="650" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- Internal L6 arrows -->
+    <mxCell id="a_l6_1" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="l6_parser" target="l6_inputdesc" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_l6_2" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="l6_inputdesc" target="l6_holder" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_l6_3" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="l6_holder" target="l6_vp_asm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_l6_4" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="l6_vp_asm" target="l6_resp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ─── L5: Application Zomes ─── -->
+    <mxCell id="l5_bg" value=""
+      style="rounded=0;fillColor=#071220;strokeColor=#E8A020;strokeWidth=1.5;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="820" width="2285" height="215" as="geometry"/>
+    </mxCell>
+    <mxCell id="l5_lbl" value="L5 — APPLICATION LAYER — Holochain Zomes (hApp DNA)  ·  All execution local  ·  No cloud calls"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#E8A020;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="76" y="823" width="700" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_did" value="&lt;b&gt;DID Manager Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;ed25519 keypair gen&lt;br/&gt;did:hc: method spec&lt;br/&gt;DID document build&lt;br/&gt;Agent ID binding&lt;br/&gt;Key rotation&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_cred" value="&lt;b&gt;Credential Manager Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;SD-JWT import &amp; verify&lt;br/&gt;Selective disclosure logic&lt;br/&gt;Claim salting (SHA-256)&lt;br/&gt;Issuer DID resolution&lt;br/&gt;Expiry / status check&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="415" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_zk" value="&lt;b&gt;ZK Prover Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;zk-SNARK circuit exec&lt;br/&gt;Age ≥ 18 (no DOB leak)&lt;br/&gt;Range / membership proofs&lt;br/&gt;Local proof generation&lt;br/&gt;Proof caching&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="750" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_pres" value="&lt;b&gt;Presentation Manager Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Claim selection&lt;br/&gt;VP Token construction&lt;br/&gt;Holder binding signature&lt;br/&gt;VP Token output&lt;br/&gt;Verifier DID lookup&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7B68EE;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1085" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_audit" value="&lt;b&gt;Audit Logger Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Source Chain writes&lt;br/&gt;Entry hashing (BLAKE2b)&lt;br/&gt;Tamper detection&lt;br/&gt;Timestamp anchoring&lt;br/&gt;Integrity check&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1420" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l5_cond_zome" value="&lt;b&gt;Conductor Interface Zome&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;DHT read / write ops&lt;br/&gt;Agent validation calls&lt;br/&gt;P2P routing&lt;br/&gt;Gossip protocol&lt;br/&gt;Zome-to-Zome calls&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1755" y="848" width="300" height="170" as="geometry"/>
+    </mxCell>
+
+    <!-- ─── L4+L3+L2: Cryptographic Engine ─── -->
+    <mxCell id="l432_bg" value=""
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;strokeWidth=1.5;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="1055" width="2285" height="175" as="geometry"/>
+    </mxCell>
+    <mxCell id="l432_lbl" value="L4 + L3 + L2 — CRYPTOGRAPHIC ENGINE  ·  SD-JWT (RFC 9901)  ·  zk-SNARKs  ·  ed25519  ·  W3C DID 1.0  ·  W3C VC 2.0"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#00C9A7;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="76" y="1058" width="800" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_ed25519" value="&lt;b&gt;ed25519 Keypair&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;L2 — W3C DID 1.0&lt;br/&gt;Private key (device only)&lt;br/&gt;Public key → DID Doc&lt;br/&gt;Signing / verification&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#E8A020;strokeWidth=1.5;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_did_doc" value="&lt;b&gt;DID Document Builder&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;L2 — did:hc: method&lt;br/&gt;verificationMethod&lt;br/&gt;Authentication keys&lt;br/&gt;Service endpoints&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#E8A020;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="375" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_sdjwt" value="&lt;b&gt;SD-JWT Engine&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;L4 — RFC 9901&lt;br/&gt;Claim salting (SHA-256)&lt;br/&gt;~ disclosure objects&lt;br/&gt;Selective reveal build&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="670" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_zksnark" value="&lt;b&gt;zk-SNARK Circuit&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;L3 — Groth16 / PLONK&lt;br/&gt;Age ≥ 18 (no DOB leak)&lt;br/&gt;Range proofs&lt;br/&gt;Membership proofs&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="965" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_vp_enc" value="&lt;b&gt;VP Token Encoder&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;L4 — dc+sd-jwt&lt;br/&gt;W3C VC 2.0 wrapper&lt;br/&gt;Base64url encoding&lt;br/&gt;JWS signature&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1260" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_sig_ver" value="&lt;b&gt;Signature Verifier&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Issuer sig check&lt;br/&gt;Holder binding verify&lt;br/&gt;Expiry / status&lt;br/&gt;Revocation check&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1555" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="c_hash_eng" value="&lt;b&gt;Hash Chain Engine&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;BLAKE2b / SHA-256&lt;br/&gt;Entry prev-hash linking&lt;br/&gt;Integrity validation&lt;br/&gt;Merkle anchoring&lt;/font&gt;"
+      style="rounded=0;fillColor=#040C18;strokeColor=#E8A020;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1850" y="1082" width="270" height="130" as="geometry"/>
+    </mxCell>
+
+    <!-- ─── L1 LOCAL: Source Chain ─── -->
+    <mxCell id="sc_bg" value=""
+      style="rounded=0;fillColor=#040C18;strokeColor=#E8A020;strokeWidth=1.5;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="1253" width="1790" height="310" as="geometry"/>
+    </mxCell>
+    <mxCell id="sc_lbl" value="L1 (local) — SOURCE CHAIN — Personal Immutable Ledger per User  ·  Append-only  ·  Cryptographically linked  ·  Never leaves device"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#E8A020;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="76" y="1256" width="800" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_genesis" value="&lt;b&gt;Genesis Block&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Agent pubkey&lt;br/&gt;DNA hash&lt;br/&gt;Membrane proof&lt;br/&gt;Timestamp&lt;br/&gt;#Entry 000&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#E8A020;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="85" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_did_entry" value="&lt;b&gt;DID Create Entry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;DID document hash&lt;br/&gt;Public key ref&lt;br/&gt;prev_hash link&lt;br/&gt;Timestamp&lt;br/&gt;#Entry 001&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#E8A020;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="345" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_cred_entry" value="&lt;b&gt;Credential Entry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;SD-JWT hash&lt;br/&gt;Issuer DID ref&lt;br/&gt;Claim types (no values)&lt;br/&gt;prev_hash link&lt;br/&gt;#Entry 002&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="605" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_zk_entry" value="&lt;b&gt;ZK Proof Entry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Proof bytes&lt;br/&gt;Circuit ID&lt;br/&gt;Public inputs hash&lt;br/&gt;prev_hash link&lt;br/&gt;#Entry 003&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="865" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_vp_entry" value="&lt;b&gt;VP Presentation Entry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;VP Token hash&lt;br/&gt;Verifier DID ref&lt;br/&gt;Claims disclosed (list)&lt;br/&gt;prev_hash link&lt;br/&gt;#Entry N&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#7B68EE;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1125" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sc_more" value="&lt;b&gt;…&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Append-only&lt;br/&gt;Immutable&lt;br/&gt;More entries&lt;br/&gt;over time&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#7A8A99;dashed=1;fontColor=#7A8A99;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1385" y="1282" width="200" height="260" as="geometry"/>
+    </mxCell>
+
+    <!-- Hash chain arrows -->
+    <mxCell id="a_sc1" value="prev_hash →" style="edgeStyle=none;strokeColor=#E8A020;strokeWidth=2;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sc_genesis" target="sc_did_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_sc2" value="prev_hash →" style="edgeStyle=none;strokeColor=#E8A020;strokeWidth=2;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sc_did_entry" target="sc_cred_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_sc3" value="prev_hash →" style="edgeStyle=none;strokeColor=#E8A020;strokeWidth=2;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sc_cred_entry" target="sc_zk_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_sc4" value="prev_hash →" style="edgeStyle=none;strokeColor=#E8A020;strokeWidth=2;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sc_zk_entry" target="sc_vp_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a_sc5" value="" style="edgeStyle=none;strokeColor=#7A8A99;strokeWidth=1;dashed=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="sc_vp_entry" target="sc_more" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Holochain Conductor box (right of Source Chain) -->
+    <mxCell id="be_conductor" value="&lt;b&gt;Holochain Conductor&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Runtime engine&lt;br/&gt;DNA loading &amp; execution&lt;br/&gt;Zome call router&lt;br/&gt;WebSocket / HTTP API&lt;br/&gt;Source Chain manager&lt;br/&gt;DHT sync coordinator&lt;br/&gt;Admin interface&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#E8A020;strokeWidth=2;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1878" y="1253" width="430" height="310" as="geometry"/>
+    </mxCell>
+
+    <!-- Source Chain → Conductor link -->
+    <mxCell id="a_sc_cond" value="sync / validate" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=2;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;" edge="1" source="sc_more" target="be_conductor" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ═══════════════════════════════════════════ ZONE 4 — NETWORK LAYER ═══════════════════════════════════════════ -->
+    <mxCell id="z_net_bg" value=""
+      style="rounded=0;fillColor=#040C18;strokeColor=#00C9A7;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="1620" width="2320" height="280" as="geometry"/>
+    </mxCell>
+    <mxCell id="z_net_lbl" value="L1 (shared) — HOLOCHAIN P2P NETWORK — DHT (Distributed Hash Table)  ·  No single point of failure  ·  Offline-capable"
+      style="text;html=1;align=left;fontFamily=Courier New;fontSize=9;fontStyle=1;fontColor=#00C9A7;strokeColor=none;fillColor=none;"
+      vertex="1" parent="1">
+      <mxGeometry x="56" y="1624" width="800" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_issuer_reg" value="&lt;b&gt;Issuer Registry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Trusted Issuers list&lt;br/&gt;DID → pubkey map&lt;br/&gt;Stored in DHT shards&lt;br/&gt;Replicated across peers&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;strokeWidth=1.5;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="65" y="1650" width="280" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_revoc" value="&lt;b&gt;Revocation Registry&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Revoked credential IDs&lt;br/&gt;Status list token&lt;br/&gt;Real-time lookup&lt;br/&gt;DHT-replicated&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;strokeWidth=1.5;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="365" y="1650" width="280" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_did_docs" value="&lt;b&gt;Public DID Documents&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;Issuer pubkeys (DHT)&lt;br/&gt;DID resolution&lt;br/&gt;Verifiable records&lt;br/&gt;did:hc: resolver&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#E8A020;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="665" y="1650" width="280" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_peer1" value="&lt;b&gt;Peer Node&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;hApp instance&lt;br/&gt;Own Source Chain&lt;br/&gt;Agent validated&lt;br/&gt;DHT shard holder&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="965" y="1650" width="200" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_peer2" value="&lt;b&gt;Peer Node&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;hApp instance&lt;br/&gt;Own Source Chain&lt;br/&gt;Agent validated&lt;br/&gt;DHT shard holder&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1175" y="1650" width="200" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_peer3" value="&lt;b&gt;Peer Node&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;hApp instance&lt;br/&gt;Own Source Chain&lt;br/&gt;Agent validated&lt;br/&gt;DHT shard holder&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1385" y="1650" width="200" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_peer_n" value="&lt;b&gt;N Peers&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;No central broker&lt;br/&gt;Redundancy&lt;br/&gt;No single point&lt;br/&gt;of failure&lt;/font&gt;"
+      style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;dashed=1;fontColor=#7A8A99;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1595" y="1650" width="200" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_agent_val" value="&lt;b&gt;Agent Validator&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;validate_agent (DNA)&lt;br/&gt;Entry validation rules&lt;br/&gt;Gossip integrity check&lt;br/&gt;Peer acceptance logic&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="1805" y="1650" width="280" height="225" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="net_gossip" value="&lt;b&gt;Gossip Protocol&lt;/b&gt;&lt;br/&gt;&lt;font style='font-size:10px;color:#7A8A99;'&gt;DHT entry sync&lt;br/&gt;Incremental propagation&lt;br/&gt;No central messaging bus&lt;br/&gt;Offline catchup&lt;/font&gt;"
+      style="rounded=0;fillColor=#071220;strokeColor=#00C9A7;fontColor=#EAE6DC;fontSize=11;html=1;align=center;verticalAlign=middle;"
+      vertex="1" parent="1">
+      <mxGeometry x="2095" y="1650" width="250" height="225" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════ ZONE 5 — STANDARDS BAR ═══════════════════════════════════════════ -->
+    <mxCell id="z_std_bg" value=""
+      style="rounded=0;fillColor=#071220;strokeColor=#7A8A99;strokeWidth=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="1920" width="2320" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="std1" value="W3C DID 1.0" style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;fontColor=#E8A020;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="55" y="1930" width="155" height="35" as="geometry"/></mxCell>
+    <mxCell id="std2" value="W3C VC Data Model 2.0" style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#00C9A7;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="220" y="1930" width="220" height="35" as="geometry"/></mxCell>
+    <mxCell id="std3" value="SD-JWT RFC 9901" style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#00C9A7;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="450" y="1930" width="185" height="35" as="geometry"/></mxCell>
+    <mxCell id="std4" value="OpenID4VP v1.0 Final" style="rounded=0;fillColor=#0A1930;strokeColor=#7B68EE;fontColor=#7B68EE;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="645" y="1930" width="210" height="35" as="geometry"/></mxCell>
+    <mxCell id="std5" value="eIDAS 2.0 — Reg (EU) 2024/1183" style="rounded=0;fillColor=#0A1930;strokeColor=#7B68EE;fontColor=#7B68EE;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="865" y="1930" width="295" height="35" as="geometry"/></mxCell>
+    <mxCell id="std6" value="Holochain HDK / DNA" style="rounded=0;fillColor=#0A1930;strokeColor=#E8A020;fontColor=#E8A020;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1170" y="1930" width="200" height="35" as="geometry"/></mxCell>
+    <mxCell id="std7" value="zk-SNARKs (Groth16)" style="rounded=0;fillColor=#0A1930;strokeColor=#00C9A7;fontColor=#00C9A7;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1380" y="1930" width="200" height="35" as="geometry"/></mxCell>
+    <mxCell id="std8" value="Apache 2.0" style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#7A8A99;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1590" y="1930" width="130" height="35" as="geometry"/></mxCell>
+    <mxCell id="std9" value="Non-profit · Community governed · v0.4-alpha" style="rounded=0;fillColor=#0A1930;strokeColor=#7A8A99;fontColor=#7A8A99;fontFamily=Courier New;fontSize=10;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1730" y="1930" width="370" height="35" as="geometry"/></mxCell>
+
+    <!-- ═══════════════════════════════════════════ DATA FLOW ARROWS ═══════════════════════════════════════════ -->
+
+    <!-- Issuer → Credential Manager (SD-JWT credential issuance) -->
+    <mxCell id="arr_issue_cred" value="SD-JWT Credential"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=2.5;fontColor=#7B68EE;fontSize=10;fontFamily=Courier New;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="e_issuer" target="l5_cred" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Verifier → L6 Auth Request Parser -->
+    <mxCell id="arr_verif_req" value="OpenID4VP Request (QR / deep-link)"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=2.5;fontColor=#7B68EE;fontSize=10;fontFamily=Courier New;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+      edge="1" source="e_verifier" target="l6_parser" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- L6 Response Transmitter → Verifier (VP Token out) -->
+    <mxCell id="arr_vp_verif" value="dc+sd-jwt VP Token"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=2.5;fontColor=#00C9A7;fontSize=10;fontFamily=Courier New;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;"
+      edge="1" source="l6_resp" target="e_verifier" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- FE ↔ BE: OpenID4VP Demo UI → L6 Parser -->
+    <mxCell id="arr_fe_l6" value="Zome calls"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7A8A99;strokeWidth=1.5;fontColor=#7A8A99;fontSize=9;fontFamily=Courier New;dashed=1;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="fe_oidc" target="l6_parser" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- FE DID Card ↔ L5 DID Manager -->
+    <mxCell id="arr_fe_did" value=""
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=1.5;dashed=1;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="fe_idcard" target="l5_did" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- FE Source Chain Viewer ↔ L5 Audit Logger -->
+    <mxCell id="arr_fe_sc" value=""
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=1.5;dashed=1;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="fe_sc_view" target="l5_audit" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- FE Claim Selector ↔ L5 Credential Manager -->
+    <mxCell id="arr_fe_claim" value=""
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;dashed=1;html=1;endArrow=block;startArrow=block;startFill=0;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="fe_claim" target="l5_cred" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- L6 → L5: Protocol → Zomes -->
+    <mxCell id="arr_l6_l5_pres" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l6_inputdesc" target="l5_pres" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l6_l5_did" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l6_holder" target="l5_did" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l6_l5_cred" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l6_vp_asm" target="l5_cred" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- L5 → Crypto Layer -->
+    <mxCell id="arr_l5did_c" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_did" target="c_ed25519" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l5cred_c" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_cred" target="c_sdjwt" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l5zk_c" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_zk" target="c_zksnark" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l5pres_c" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_pres" target="c_vp_enc" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_l5audit_c" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_audit" target="c_hash_eng" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- L5 → Source Chain (write entries) -->
+    <mxCell id="arr_did_sc_e" value="Write DID entry" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E8A020;strokeWidth=1.5;fontColor=#E8A020;fontSize=9;fontFamily=Courier New;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_did" target="sc_did_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_cred_sc_e" value="Write cred entry" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;fontColor=#00C9A7;fontSize=9;fontFamily=Courier New;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_cred" target="sc_cred_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_zk_sc_e" value="Write proof entry" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;fontColor=#00C9A7;fontSize=9;fontFamily=Courier New;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_zk" target="sc_zk_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="arr_pres_sc_e" value="Write VP entry" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7B68EE;strokeWidth=1.5;fontColor=#7B68EE;fontSize=9;fontFamily=Courier New;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="l5_pres" target="sc_vp_entry" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Conductor ↔ DHT Network -->
+    <mxCell id="arr_cond_net" value="DHT sync ↔"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=2;fontColor=#00C9A7;fontSize=10;fontFamily=Courier New;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=block;startArrow=block;startFill=0;endFill=0;"
+      edge="1" source="be_conductor" target="net_agent_val" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- L5 Conductor Zome → Issuer Registry lookup -->
+    <mxCell id="arr_cond_issreg" value="Issuer DID lookup"
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;fontColor=#00C9A7;fontSize=9;fontFamily=Courier New;dashed=1;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="l5_cred" target="net_issuer_reg" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- L5 Conductor Zome → Network (P2P) -->
+    <mxCell id="arr_czome_net" value=""
+      style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00C9A7;strokeWidth=1.5;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+      edge="1" source="l5_cond_zome" target="net_gossip" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
