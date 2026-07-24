@@ -2,9 +2,9 @@
 resolver = "2"
 
 members = [
-  "dnas/autonymous/zomes/identity_wallet",
-  "dnas/autonymous/zomes/openid4vp",
-  "dnas/autonymous/zomes/zk_prover",
+  "dnas/core/zomes/identity_wallet",
+  "dnas/core/zomes/openid4vp",
+  "dnas/core/zomes/zk_prover",
 ]
 
 [workspace.dependencies]
@@ -18,7 +18,6 @@ hex          = "0.4"
 thiserror    = "1.0"
 
 [profile.release]
-opt-level    = "z"    # minimise wasm size
+opt-level    = "z"
 lto          = true
 codegen-units = 1
-

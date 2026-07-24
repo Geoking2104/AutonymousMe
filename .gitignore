@@ -38,3 +38,8 @@ api/dist/
 # Build/test logs
 *.log
 
+
+# Holochain sandbox runtime artifacts
+.hc
+.hc_live_*
+
