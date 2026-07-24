@@ -16,9 +16,20 @@ Autonymous.me is an **open-source, non-profit, community-governed protocol** for
 
 ---
 
+## Current status: specification complete, implementation not started
+
+Everything in this repository today is design, not running software. `README.md`, `Functional_Specifications.docx`, and `Technical_Specifications.docx` form a complete functional and technical specification: requirements, DNA/Zome architecture, SD-JWT pipeline, OpenID4VP flow, zk-SNARK circuit, REST API, and threat model. `docs/architecture/` holds the full system diagram. `index.html` is a static demo page, not a functional prototype.
+
+No Holochain DNA, Zomes, wallet UI, zk circuits, SDK, or REST API have been written yet. The repository layout described in the technical spec (`dna/`, `ui/`, `circuits/`, `sdk/`, `api/`, `tests/`) does not exist in this repo. The roadmap below reflects design status, not shipped code.
+
+If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: what exists today is a rigorous, standards-referenced design ready to be built against, not working code. Get in touch via [Issues](https://github.com/geoking2104/autonymous.me/issues) or support@autonymous.me if you want to help build it.
+
+---
+
 ## Table of contents
 
-- [Why it exists](#why-it-exists)
+- [Current status](#current-status-specification-complete-implementation-not-started)
+- - [Why it exists](#why-it-exists)
 - [How it works](#how-it-works)
 - [Architecture](#architecture)
 - [Standards compliance](#standards-compliance)
@@ -205,10 +216,10 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 1 — Core protocol design | ✅ Complete | DID method, zk circuits, SD-JWT schema |
-| 2 — Alpha wallet (desktop) | ✅ Complete | Key management, credential import, Source Chain UI |
-| 3 — OpenID4VP integration | ✅ Complete | Full flow, dc+sd-jwt, holder binding |
-| 4 — Issuer registry & integrations | 🔄 In progress | DHT registry, REST API, browser extension |
+| 1 — Core protocol design | 📐 Spec complete | DID method, zk circuits, SD-JWT schema — see Technical_Specifications.docx |
+| 2 — Alpha wallet (desktop) | 📐 Spec complete, code not started | Key management, credential import, Source Chain UI |
+| 3 — OpenID4VP integration | 📐 Spec complete, code not started | Full flow, dc+sd-jwt, holder binding |
+| 4 — Issuer registry & integrations | 📋 Not started | DHT registry, REST API, browser extension 
 | 5 — Mobile app & governance | 📋 Planned Q3 2025 | iOS/Android, community governance v1 |
 | 6 — eIDAS 2.0 production | 📋 Planned 2026 | Certification, EUDI Wallet bridge |
 
