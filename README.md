@@ -105,16 +105,24 @@ eIDAS 2.0 requires a wallet, an issuer, and a verifier. Autonymous.me adds:
 
 ```
 autonymous.me/
-├── index.html          # Full standalone website (no external dependencies)
-├── README.md           # This file
-├── LICENSE             # Apache 2.0
-├── CONTRIBUTING.md     # Contribution guidelines (coming soon)
-├── GOVERNANCE.md       # Community governance model (coming soon)
-└── docs/               # Technical specifications (coming soon)
-    ├── did-method.md
-    ├── openid4vp-flow.md
-    └── sd-jwt-schema.md
+├── index.html                       # Full standalone website (no external dependencies)
+├── autonymous-standalone.html       # Working copy of the standalone site
+├── autonymous-architecture.drawio   # Editable architecture diagram source (draw.io)
+├── Functional_Specifications.docx   # Functional specification
+├── Technical_Specifications.docx    # Technical specification
+├── README.md                        # This file
+├── LICENSE                          # Apache 2.0
+├── CONTRIBUTING.md                  # Contribution guidelines (coming soon)
+├── GOVERNANCE.md                    # Community governance model (coming soon)
+└── docs/
+    └── architecture/                # Architecture diagram exports (v0.4-alpha)
+        ├── autonymous-architecture.drawio
+        ├── autonymous-architecture.drawio.xml
+        ├── autonymous-architecture.drawio.html   # Interactive viewer, no draw.io app needed
+        └── autonymous-architecture.drawio.pdf    # Printable version
 ```
+
+[View the interactive architecture diagram](docs/architecture/autonymous-architecture.drawio.html) · [PDF version](docs/architecture/autonymous-architecture.drawio.pdf)
 
 ---
 
