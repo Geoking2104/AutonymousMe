@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+
+members = [
+  "dnas/autonymous/zomes/identity_wallet",
+  "dnas/autonymous/zomes/openid4vp",
+  "dnas/autonymous/zomes/zk_prover",
+]
+
+[workspace.dependencies]
+hdk          = "0.4.1"
+hdi          = "0.5.1"
+serde        = { version = "1.0", features = ["derive"] }
+serde_json   = "1.0"
+base64       = "0.22"
+sha2         = "0.10"
+hex          = "0.4"
+thiserror    = "1.0"
+
+[profile.release]
+opt-level    = "z"    # minimise wasm size
+lto          = true
+codegen-units = 1
+

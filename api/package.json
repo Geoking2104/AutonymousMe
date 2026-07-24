@@ -1,0 +1,29 @@
+{
+  "name": "@autonymous.me/api",
+  "version": "0.4.0",
+  "description": "REST API for Autonymous.me: OpenID4VP request/callback, DID resolution, credential status. See Technical_Specifications.docx section 8.",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "@holochain/client": "^0.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "supertest": "^6.3.4",
+    "tsx": "^4.7.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/supertest": "^6.0.2",
+    "@types/node": "^20.11.0"
+  }
+}

@@ -1,0 +1,19 @@
+---
+manifest_version: "1"
+
+name: autonymous_me
+description: >
+  Self-sovereign identity on Holochain.
+  Privacy-preserving credential wallet with OpenID4VP and SD-JWT support.
+  eIDAS 2.0 compliant. No central server. No single point of failure.
+
+roles:
+  - name: autonymous
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: dnas/autonymous/autonymous.dna
+      modifiers:
+        network_seed: ~
+        properties: ~

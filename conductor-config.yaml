@@ -1,0 +1,32 @@
+---
+# Autonymous.me — Holochain Conductor Configuration
+# Reference: https://docs.rs/holochain_conductor_api/latest
+
+data_root_path: ./conductor-data
+
+keystore:
+  type: lair_server_in_proc
+
+admin_interfaces:
+  - driver:
+      type: websocket
+      port: 9000
+      allowed_origins: "*"
+
+app_interfaces:
+  - driver:
+      type: websocket
+      port: 8888
+      allowed_origins: "*"
+    installed_app_id: autonymous-me
+
+network:
+  bootstrap_service: https://bootstrap.holo.host
+  transport_pool:
+    - type: webrtc
+      signal_url: wss://signal.holo.host
+  tuning_params:
+    gossip_outbound_target_mbps: 0.5
+    gossip_inbound_target_mbps: 0.5
+
+db_sync_level: Normal

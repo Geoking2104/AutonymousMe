@@ -1,0 +1,27 @@
+---
+manifest_version: "1"
+
+name: autonymous
+integrity_zomes:
+  - name: identity_wallet_integrity
+    bundled: "../../target/wasm32-unknown-unknown/release/identity_wallet.wasm"
+  - name: openid4vp_integrity
+    bundled: "../../target/wasm32-unknown-unknown/release/openid4vp.wasm"
+  - name: zk_prover_integrity
+    bundled: "../../target/wasm32-unknown-unknown/release/zk_prover.wasm"
+
+coordinator_zomes:
+  - name: identity_wallet
+    bundled: "../../target/wasm32-unknown-unknown/release/identity_wallet.wasm"
+    dependencies:
+      - name: identity_wallet_integrity
+  - name: openid4vp
+    bundled: "../../target/wasm32-unknown-unknown/release/openid4vp.wasm"
+    dependencies:
+      - name: openid4vp_integrity
+      - name: identity_wallet
+  - name: zk_prover
+    bundled: "../../target/wasm32-unknown-unknown/release/zk_prover.wasm"
+    dependencies:
+      - name: zk_prover_integrity
+      - name: identity_wallet

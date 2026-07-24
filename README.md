@@ -16,20 +16,26 @@ Autonymous.me is an **open-source, non-profit, community-governed protocol** for
 
 ---
 
-## Current status: specification complete, implementation not started
+## Current status: DNA, Zomes, ZK circuit, SDK, and REST API implemented (alpha)
 
-Everything in this repository today is design, not running software. `README.md`, `Functional_Specifications.docx`, and `Technical_Specifications.docx` form a complete functional and technical specification: requirements, DNA/Zome architecture, SD-JWT pipeline, OpenID4VP flow, zk-SNARK circuit, REST API, and threat model. `docs/architecture/` holds the full system diagram. `index.html` is a static demo page, not a functional prototype.
+This repository has moved from specification to working code. What exists and is verified today:
 
-No Holochain DNA, Zomes, wallet UI, zk circuits, SDK, or REST API have been written yet. The repository layout described in the technical spec (`dna/`, `ui/`, `circuits/`, `sdk/`, `api/`, `tests/`) does not exist in this repo. The roadmap below reflects design status, not shipped code.
+- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.4.1 / HDI 0.5.1. All three compile to wasm32-unknown-unknown in release mode and pass 13 integration tests (cargo test --workspace, zero failures).
+- A real zk-SNARK circuit (circuits/age_check, Circom 2.1.4) proving age >= 18 without revealing date of birth. Verified end-to-end with a real Groth16 trusted setup: witness computed correctly at boundary conditions, proof generated, and cryptographically verified as valid.
+- A verifier-facing TypeScript SDK (sdk/) wrapping the REST API and doing local, offline Groth16 proof verification via snarkjs. Compiles clean, 9 unit tests passing.
+- A REST API (api/, Node/Express) implementing the OpenID4VP request/callback, DID resolution, and credential status endpoints from the technical spec. Compiles clean, 12 tests passing against an in-memory backend.
 
-If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: what exists today is a rigorous, standards-referenced design ready to be built against, not working code. Get in touch via [Issues](https://github.com/geoking2104/autonymous.me/issues) or support@autonymous.me if you want to help build it.
+What is not yet done: a Holochain-backed implementation of the REST API (the adapter exists in api/src/backends/holochainBackend.ts but has not been run against a live conductor - no Holochain conductor process was available in the environment this was built in), the wallet UI (ui/ is carried over from an earlier prototype and has not been re-verified against the current zomes), and a production trusted setup for the zk circuit (the current Powers of Tau ceremony is dev-only, see circuits/age_check/README.md).
 
+In short: the core logic is real, tested code, not scaffolding. The remaining gap to a shippable product is wiring the pieces together end-to-end against a live Holochain conductor and hardening the trusted setup.
+
+If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: get in touch via [Issues](https://github.com/Geoking2104/AutonymousMe/issues) or support@autonymous.me.
 ---
 
 ## Table of contents
 
-- [Current status](#current-status-specification-complete-implementation-not-started)
-- - [Why it exists](#why-it-exists)
+- [Current status](#current-status-dna-zomes-zk-circuit-sdk-and-rest-api-implemented-alpha)
+- [Why it exists](#why-it-exists)
 - [How it works](#how-it-works)
 - [Architecture](#architecture)
 - [Standards compliance](#standards-compliance)
@@ -115,26 +121,37 @@ eIDAS 2.0 requires a wallet, an issuer, and a verifier. Autonymous.me adds:
 ## Project structure
 
 ```
-autonymous.me/
-├── index.html                       # Full standalone website (no external dependencies)
-├── autonymous-standalone.html       # Working copy of the standalone site
-├── autonymous-architecture.drawio   # Editable architecture diagram source (draw.io)
-├── Functional_Specifications.docx   # Functional specification
-├── Technical_Specifications.docx    # Technical specification
-├── README.md                        # This file
-├── LICENSE                          # Apache 2.0
-├── CONTRIBUTING.md                  # Contribution guidelines (coming soon)
-├── GOVERNANCE.md                    # Community governance model (coming soon)
-└── docs/
-    └── architecture/                # Architecture diagram exports (v0.4-alpha)
-        ├── autonymous-architecture.drawio
-        ├── autonymous-architecture.drawio.xml
-        ├── autonymous-architecture.drawio.html   # Interactive viewer, no draw.io app needed
-        └── autonymous-architecture.drawio.pdf    # Printable version
+AutonymousMe/
+  Cargo.toml                       - Rust workspace manifest (3 zomes)
+  happ.yaml                        - Holochain hApp manifest
+  conductor-config.yaml            - Local conductor configuration
+  Makefile, Dockerfile             - Build and container helpers
+  dnas/autonymous/
+    dna.yaml
+    zomes/
+      identity_wallet/             - DID lifecycle, credential wallet, audit log (Rust/HDK)
+      openid4vp/                   - OpenID4VP request/response flow (Rust/HDK)
+      zk_prover/                   - zk proof storage/audit zome (Rust/HDK)
+  circuits/age_check/              - Circom age>=18 circuit + Groth16 prove/verify scripts
+  sdk/                             - Verifier-facing TypeScript SDK
+  api/                             - REST API (Node/Express), spec section 8
+  ui/                              - Wallet UI (prototype, not yet re-verified)
+  index.html                       - Standalone marketing site
+  autonymous-standalone.html       - Working copy of the standalone site
+  Functional_Specifications.docx   - Functional specification
+  Technical_Specifications.docx    - Technical specification
+  README.md                        - This file
+  LICENSE                          - Apache 2.0
+  docs/
+    happ-architecture.md           - hApp-level architecture notes
+    architecture/                  - System diagram exports (v0.4-alpha)
+      autonymous-architecture.drawio
+      autonymous-architecture.drawio.xml
+      autonymous-architecture.drawio.html
+      autonymous-architecture.drawio.pdf
 ```
 
-[View the interactive architecture diagram](docs/architecture/autonymous-architecture.drawio.html) · [PDF version](docs/architecture/autonymous-architecture.drawio.pdf)
-
+[View the interactive architecture diagram](docs/architecture/autonymous-architecture.drawio.html) - [PDF version](docs/architecture/autonymous-architecture.drawio.pdf)
 ---
 
 ## Getting started
@@ -144,38 +161,40 @@ autonymous.me/
 The project website is a fully self-contained single HTML file with no external dependencies. Open it directly in any browser:
 
 ```bash
-git clone https://github.com/geoking2104/autonymous.me
-cd autonymous.me
+git clone https://github.com/Geoking2104/AutonymousMe
+cd AutonymousMe
 open index.html   # macOS
 # or: xdg-open index.html  (Linux)
 # or: start index.html      (Windows)
 ```
 
-### Run the prototype hApp (coming in Phase 4)
+### Build and test the Holochain zomes
 
 ```bash
-# Prerequisites: Node.js 18+, Holochain conductor
-git clone https://github.com/geoking2104/autonymous.me
-cd autonymous.me
+# Prerequisites: Rust + rustup, wasm32-unknown-unknown target
+rustup target add wasm32-unknown-unknown
+cargo build --target wasm32-unknown-unknown --release --workspace
+cargo test --workspace
+```
+
+This builds identity_wallet.wasm, openid4vp.wasm, and zk_prover.wasm and runs all zome-level integration tests (13 passing). Running the full hApp against a live Holochain conductor (hc sandbox) has not yet been verified in this repository.
+
+### Build and test the zk circuit
+
+```bash
+cd circuits/age_check
 npm install
-npm run dev
-# → Holochain conductor started
-# → DID wallet initialized
-# → OpenID4VP handler ready
-# → hApp running at localhost:8080
+npm run compile
+npm run test          # computes witness at boundary ages
+npm run setup:phase2 && npm run prove && npm run verify
 ```
 
-### Issue a test SD-JWT credential
+### Build and test the SDK and API
 
 ```bash
-autonymous.me vc issue --type age --value 25 --format sd-jwt
-# → SD-JWT credential signed and stored locally
-
-autonymous.me openid4vp verify --preset kyc-age
-# → VP Token generated: dc+sd-jwt
-# → Logged to Source Chain: QmVP9f...
+cd sdk && npm install && npm run build && npm test
+cd ../api && npm install && npm run build && npm test
 ```
-
 ---
 
 ## Contributing
@@ -216,13 +235,12 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 1 — Core protocol design | 📐 Spec complete | DID method, zk circuits, SD-JWT schema — see Technical_Specifications.docx |
-| 2 — Alpha wallet (desktop) | 📐 Spec complete, code not started | Key management, credential import, Source Chain UI |
-| 3 — OpenID4VP integration | 📐 Spec complete, code not started | Full flow, dc+sd-jwt, holder binding |
-| 4 — Issuer registry & integrations | 📋 Not started | DHT registry, REST API, browser extension 
-| 5 — Mobile app & governance | 📋 Planned Q3 2025 | iOS/Android, community governance v1 |
-| 6 — eIDAS 2.0 production | 📋 Planned 2026 | Certification, EUDI Wallet bridge |
-
+| 1 - Core protocol design | Done | DID method, zk circuit design, SD-JWT schema - see Technical_Specifications.docx |
+| 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests passing); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) |
+| 3 - End-to-end integration | Not started | Wire the REST API to a live Holochain conductor (HolochainBackend adapter exists but is unverified); re-verify the wallet UI against the current zomes |
+| 4 - Issuer registry & production trusted setup | Not started | DHT-based issuer registry; production-grade Powers of Tau ceremony (current one is dev-only) |
+| 5 - Mobile app & governance | Planned | iOS/Android, community governance v1 |
+| 6 - eIDAS 2.0 production | Planned | Certification, EUDI Wallet bridge |
 ---
 
 ## License

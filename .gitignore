@@ -1,0 +1,40 @@
+# Rust
+/target/
+
+# Holochain
+*.dna
+*.happ
+conductor-data/
+lair/
+
+# Node
+ui/node_modules/
+ui/dist/
+
+# OS
+.DS_Store
+*.swp
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Circuits
+circuits/*/node_modules/
+circuits/*/build/
+circuits/*/circom.exe
+circuits/*/input_*.json
+
+# SDK / API
+sdk/node_modules/
+sdk/dist/
+api/node_modules/
+api/dist/
+
+
+# Build/test logs
+*.log
+
