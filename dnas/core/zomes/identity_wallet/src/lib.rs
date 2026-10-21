@@ -134,7 +134,7 @@ pub struct RevokeCredentialInput {
 /// The DID is derived from the agent's public key.
 #[hdk_extern]
 pub fn create_did(input: CreateDidInput) -> ExternResult<CreateDidOutput> {
-    let agent_pub_key = agent_info()?.agent_latest_pubkey;
+    let agent_pub_key = agent_info()?.agent_initial_pubkey;
     let did = format!("did:hc:{}", agent_pub_key);
 
     let record = DidRecord {

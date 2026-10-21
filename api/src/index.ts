@@ -50,13 +50,19 @@ async function connectHolochainBackend(): Promise<HolochainBackend> {
   });
 
   const appInfo = await appWs.appInfo();
-  const cellInfo = appInfo.cell_info[roleName]?.[0];
-  if (!cellInfo || !("provisioned" in cellInfo)) {
+  const cellInfoEntry = appInfo.cell_info[roleName]?.[0];
+  if (!cellInfoEntry) {
     throw new Error(
-      `No provisioned cell found for role "${roleName}" in app "${installedAppId}"`,
+      `No cell found for role "${roleName}" in app "${installedAppId}"`,
     );
   }
-  const cellId = cellInfo.provisioned.cell_id;
+  // Holochain 0.5+ serializes enums as { type, value }
+  if (cellInfoEntry.type !== "provisioned" || !cellInfoEntry.value) {
+    throw new Error(
+      `Cell for role "${roleName}" is not provisioned (got: ${cellInfoEntry.type})`,
+    );
+  }
+  const cellId = cellInfoEntry.value.cell_id;
 
   await admin.authorizeSigningCredentials(cellId);
 

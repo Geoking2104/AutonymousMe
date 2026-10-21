@@ -16,19 +16,18 @@ Autonymous.me is an **open-source, non-profit, community-governed protocol** for
 
 ---
 
-## Current status: DNA, Zomes, ZK circuit, SDK, and REST API implemented and verified against a live conductor
+## Current status: migrated to Holochain 0.6 — DNA, Zomes, ZK circuit, SDK, REST API implemented and verified end-to-end against a live 0.6.1 conductor
 
-This repository has moved from specification to working, independently-verified code:
+This repository has moved from specification to working, independently-verified code, and has been migrated from Holochain 0.4 to **Holochain 0.6** (kitsune2 + iroh/QUIC network stack, manifest_version "0", hdk 0.6.1 / hdi 0.7.1, @holochain/client 0.20):
 
-- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.4.1 / HDI 0.5.1. All three compile to wasm32-unknown-unknown in release mode and pass 13 integration tests.
+- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.6.1 / HDI 0.7.1. All three compile to wasm32-unknown-unknown in release mode (with the 0.6-required `--cfg getrandom_backend="custom"`) and pass 13 integration tests.
 - A real zk-SNARK circuit (circuits/age_check, Circom 2.1.4) proving age >= 18 without revealing date of birth, verified with a real (dev-only) Groth16 trusted setup: witness correctness, proof generation, and cryptographic verification.
 - A verifier-facing TypeScript SDK (sdk/), 9 passing unit tests, local offline zk proof verification via snarkjs.
 - A REST API (api/, Node/Express) implementing the OpenID4VP request/callback, DID resolution, and credential status endpoints, 12 passing tests against an in-memory backend.
-- A Holochain-backed implementation of that same REST API (api/src/backends/holochainBackend.ts), verified end-to-end against a real `holochain` 0.4.1 conductor started via `hc sandbox`: real DID creation and read-back, real presentation recording, real credential-status lookups, all with actual source-chain writes and reads. See api/scripts/verify-conductor.mjs and api/README.md for how this was done and what it found.
+- A Holochain-backed implementation of that same REST API (api/src/backends/holochainBackend.ts), **verified end-to-end against a real `holochain` 0.6.1 conductor**: real DID creation and read-back, real audit-log writes, real presentation recording and listing, real credential-status lookups — all with actual source-chain writes and reads, through the 0.5+ `{type, value}` enum wire format. See api/scripts/verify-conductor-06.mjs for the exact reproducible scenario (all 13 checks green on 2026-10-21).
+- The DNA package lives in `dnas/core` (the legacy `dnas/autonomous` directory has been removed; its sources were confirmed byte-identical apart from comment encoding before deletion). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
 
-The DNA package used for that live-conductor verification lives in `dnas/core` rather than `dnas/autonomous`. The original `dnas/autonomous` directory is left in place for history but its `dna.yaml` predates two packaging fixes that were only discoverable by actually running `hc dna pack` / `hc app pack` / a live conductor: the manifest schema for manifest_version "1" needs nested `integrity: { zomes: [...] }` / `coordinator: { zomes: [...] }` (not top-level `integrity_zomes` / `coordinator_zomes`), and each zome's integrity and coordinator manifest entries need distinct bundled wasm file paths even when the underlying bytes are identical. `dnas/core` and the root `Cargo.toml` / `happ.yaml` are the canonical, working versions; `dnas/autonomous` should be removed in a future cleanup once its content is confirmed fully superseded.
-
-What remains: the wallet UI (`ui/`) is carried over from an earlier prototype and has not been re-verified against the current zomes, and the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md).
+What remains: the wallet UI (`ui/`) compiles and its client has been updated to `@holochain/client` 0.20 (0.5+ enum shapes, no nullable cap_secret), but it has not yet been re-verified interactively against the current zomes, and the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md).
 
 If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: get in touch via [Issues](https://github.com/Geoking2104/AutonymousMe/issues) or support@autonymous.me.
 ---
@@ -127,16 +126,21 @@ AutonymousMe/
   happ.yaml                        - Holochain hApp manifest
   conductor-config.yaml            - Local conductor configuration
   Makefile, Dockerfile             - Build and container helpers
-  dnas/core/                       - canonical DNA package (verified against a live conductor)
-    dna.yaml
+  dnas/core/                       - canonical DNA package (verified against a live 0.6.1 conductor)
+    dna.yaml                       - manifest_version "0" (path: fields, no origin_time)
     zomes/
-      identity_wallet/             - DID lifecycle, credential wallet, audit log (Rust/HDK)
-      openid4vp/                   - OpenID4VP request/response flow (Rust/HDK)
-      zk_prover/                   - zk proof storage/audit zome (Rust/HDK)
+      identity_wallet/             - DID lifecycle, credential wallet, audit log (Rust/HDK 0.6.1)
+      openid4vp/                   - OpenID4VP request/response flow (Rust/HDK 0.6.1)
+      zk_prover/                   - zk proof storage/audit zome (Rust/HDK 0.6.1)
   circuits/age_check/              - Circom age>=18 circuit + Groth16 prove/verify scripts
   sdk/                             - Verifier-facing TypeScript SDK
   api/                             - REST API (Node/Express), spec section 8
-  ui/                              - Wallet UI (prototype, not yet re-verified)
+    scripts/verify-conductor-06.mjs - 13-check live-conductor e2e scenario (0.6.1)
+  ui/                              - Wallet UI (client updated to @holochain/client 0.20)
+  scripts/copy-coordinator-wasms.mjs - distinct coordinator wasm copies for dna pack
+  flake.nix                        - Holonix dev environment (main-0.6)
+  package.json                     - root npm workspace (build:happ / package / test scripts)
+  web-happ.yaml                    - web hApp manifest (UI + hApp bundle)
   index.html                       - Standalone marketing site
   autonymous-standalone.html       - Working copy of the standalone site
   Functional_Specifications.docx   - Functional specification
@@ -171,14 +175,36 @@ open index.html   # macOS
 
 ### Build and test the Holochain zomes
 
+The recommended toolchain is the Holonix Nix environment (see
+[developer.holochain.org/get-started](https://developer.holochain.org/get-started/)):
+
+```bash
+nix develop                    # holochain 0.6.x, hc, node 22, binaryen
+npm install                    # root workspace (ui, api, sdk)
+```
+
+Without Nix (any OS with Rust + Node 22): download the `hc` and `holochain`
+0.6.1 binaries from the [holochain releases](https://github.com/holochain/holochain/releases/tag/holochain-0.6.1)
+and make sure they are on your PATH, then:
+
 ```bash
 # Prerequisites: Rust + rustup, wasm32-unknown-unknown target
 rustup target add wasm32-unknown-unknown
-cargo build --target wasm32-unknown-unknown --release --workspace
-cargo test --workspace
+
+# 0.6 requires the getrandom custom backend during wasm builds
+RUSTFLAGS='--cfg getrandom_backend="custom"' \
+  cargo build --release --target wasm32-unknown-unknown --workspace
+
+cargo test --workspace          # 13 tests
+node scripts/copy-coordinator-wasms.mjs
+hc dna pack dnas/core/ --output dnas/core/core.dna
+hc app pack . --output autonymous-me.happ
 ```
 
-This builds identity_wallet.wasm, openid4vp.wasm, and zk_prover.wasm and runs all zome-level integration tests (13 passing). Running the full hApp against a live Holochain conductor (hc sandbox) has not yet been verified in this repository.
+This builds identity_wallet.wasm, openid4vp.wasm, and zk_prover.wasm plus
+their `_coordinator` copies, and packs the DNA and hApp bundles. On Windows,
+native conductor runs are not supported — use WSL2 (the zomes still build
+natively; only the conductor needs Linux).
 
 ### Build and test the zk circuit
 
@@ -190,12 +216,26 @@ npm run test          # computes witness at boundary ages
 npm run setup:phase2 && npm run prove && npm run verify
 ```
 
-### Build and test the SDK and API
+### Run against a live conductor (end-to-end verification)
 
 ```bash
-cd sdk && npm install && npm run build && npm test
-cd ../api && npm install && npm run build && npm test
+# with the above bundles built, and hc/holochain 0.6.1 on PATH (Linux/WSL):
+holochain --create-config                       # or any sandbox config
+# set a fixed admin port in the generated conductor-config.yaml, then:
+echo pass | holochain --piped -c conductor-config.yaml &
+
+hc sandbox call --running <admin-port> install-app --app-id autonomous_me /abs/path/autonymous-me.happ
+hc sandbox call --running <admin-port> enable-app autonomous_me
+hc sandbox call --running <admin-port> add-app-ws 9000
+
+# from api/ (Node 22): the 13-check end-to-end scenario
+cd api && npm ci && node scripts/verify-conductor-06.mjs
 ```
+
+api/scripts/verify-conductor-06.mjs exercises: admin/app websocket connect,
+app auth token, signing credentials, `create_did` → `get_my_did` →
+`get_audit_log` → `record_presentation` → `list_presentations` →
+`list_zk_proofs`, asserting real source-chain writes and reads.
 ---
 
 ## Contributing
@@ -237,8 +277,8 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 1 - Core protocol design | Done | DID method, zk circuit design, SD-JWT schema - see Technical_Specifications.docx |
-| 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests passing); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) |
-| 3 - End-to-end integration | Done for the REST API / Holochain backend | HolochainBackend verified end-to-end against a live `hc sandbox` conductor (real DID + presentation + credential-status round trips). Wallet UI (ui/) still needs re-verification against the current zomes |
+| 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests passing); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) — all on Holochain 0.6 (hdk 0.6.1 / hdi 0.7.1) |
+| 3 - End-to-end integration | Done for the REST API / Holochain backend | HolochainBackend verified end-to-end against a live `holochain` **0.6.1** conductor (13-check scenario in api/scripts/verify-conductor-06.mjs: real DID + audit + presentation round trips). Wallet UI (ui/) still needs interactive re-verification against the current zomes |
 | 4 - Issuer registry & production trusted setup | Not started | DHT-based issuer registry; production-grade Powers of Tau ceremony (current one is dev-only) |
 | 5 - Mobile app & governance | Planned | iOS/Android, community governance v1 |
 | 6 - eIDAS 2.0 production | Planned | Certification, EUDI Wallet bridge |

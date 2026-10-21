@@ -1,0 +1,13 @@
+---
+manifest_version: "0"
+
+name: autonymous-me
+description: >
+  Autonymous.me wallet UI + hApp bundle for distribution via Holochain
+  runtimes (web hApp format).
+
+ui:
+  path: ui/dist.zip
+
+happ:
+  path: ./autonymous-me.happ

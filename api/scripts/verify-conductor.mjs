@@ -41,8 +41,8 @@ async function main() {
   console.log("Connected to app interface");
 
   const appInfo = await app.appInfo();
-  const cellInfo = appInfo.cell_info["autonomous"][0];
-  const cellId = cellInfo.provisioned.cell_id;
+  const cellInfoEntry = appInfo.cell_info["autonomous"][0];
+  const cellId = cellInfoEntry.value.cell_id;
   console.log("Cell id:", cellId);
 
   await admin.authorizeSigningCredentials(cellId);

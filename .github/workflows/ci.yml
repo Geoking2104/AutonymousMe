@@ -7,9 +7,9 @@ on:
     branches: [main]
 
 env:
-  RUST_VERSION: "1.77"
-  NODE_VERSION: "20"
-  HOLOCHAIN_VERSION: "0.4.1"
+  RUST_VERSION: "1.87"
+  NODE_VERSION: "22"
+  HOLOCHAIN_VERSION: "0.6.1"
 
 jobs:
   # ── Rust: check + test zomes ──────────────────────────────────────────────
@@ -36,19 +36,18 @@ jobs:
       - name: Unit tests
         run: cargo test --workspace
 
-      - name: Check wasm32 compilation
+      - name: Check wasm32 compilation (0.6 requires the getrandom custom backend)
         run: cargo build --release --target wasm32-unknown-unknown --workspace
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
       - name: Clippy lint
         run: cargo clippy --workspace -- -D warnings
 
-  # ── UI: lint + build ──────────────────────────────────────────────────────
-  ui:
-    name: UI — lint & build
+  # ── JS: API + SDK + UI ────────────────────────────────────────────────────
+  js:
+    name: API / SDK / UI — build & test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ui
     steps:
       - uses: actions/checkout@v4
 
@@ -57,22 +56,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ui/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript check
-        run: npx tsc --noEmit
+      - name: Build & test workspaces
+        run: |
+          npm run build --workspace api && npm test --workspace api
+          npm run build --workspace sdk && npm test --workspace sdk
+          npm run build --workspace ui
 
-      - name: Build
-        run: npm run build
-
-  # ── Pack hApp bundle ──────────────────────────────────────────────────────
+  # ── Pack hApp + web hApp bundles ─────────────────────────────────────────
   pack:
-    name: Pack hApp
+    name: Pack hApp & web hApp
     runs-on: ubuntu-latest
-    needs: [zomes, ui]
+    needs: [zomes, js]
     steps:
       - uses: actions/checkout@v4
 
@@ -83,24 +81,56 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
 
-      - name: Build zomes
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install holochain CLI ${{ env.HOLOCHAIN_VERSION }}
+        run: |
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/hc-x86_64-unknown-linux-gnu" -o /usr/local/bin/hc
+          chmod +x /usr/local/bin/hc
+          hc --version
+
+      - name: Build zomes (wasm32, getrandom custom backend)
         run: cargo build --release --target wasm32-unknown-unknown --workspace
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
-      - name: Install holochain CLI
-        run: cargo install holochain_cli --version ${{ env.HOLOCHAIN_VERSION }} --locked
+      - name: Copy coordinator wasms (distinct paths required by hc dna pack)
+        run: node scripts/copy-coordinator-wasms.mjs
 
-      - name: Pack DNA
-        run: hc dna pack dnas/autonymous/ --output dnas/autonymous/autonymous.dna
+      - name: Pack DNA (dnas/core is the canonical DNA)
+        run: hc dna pack dnas/core/ --output dnas/core/core.dna
 
       - name: Pack hApp
         run: hc app pack . --output autonymous-me.happ
+
+      - name: Build UI & pack web hApp
+        run: |
+          npm run build --workspace ui
+          cd ui && zip -r dist.zip dist && cd ..
+          hc web-app pack . --output autonymous-me.webhapp
 
       - name: Upload hApp artifact
         uses: actions/upload-artifact@v4
         with:
           name: autonymous-me-happ
           path: autonymous-me.happ
+          retention-days: 30
+
+      - name: Upload web hApp artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonymous-me-webhapp
+          path: autonymous-me.webhapp
           retention-days: 30
 
   # ── Security audit ────────────────────────────────────────────────────────
@@ -114,3 +144,25 @@ jobs:
         run: cargo install cargo-audit --locked
       - name: Run audit
         run: cargo audit
+
+  # ── Conductor smoke test ──────────────────────────────────────────────────
+  conductor:
+    name: Conductor smoke test (hc sandbox)
+    runs-on: ubuntu-latest
+    needs: [pack]
+    steps:
+      - name: Download hApp artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: autonymous-me-happ
+
+      - name: Install holochain + hc ${{ env.HOLOCHAIN_VERSION }}
+        run: |
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/holochain-x86_64-unknown-linux-gnu" -o /usr/local/bin/holochain
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/hc-x86_64-unknown-linux-gnu" -o /usr/local/bin/hc
+          chmod +x /usr/local/bin/holochain /usr/local/bin/hc
+          holochain --version
+
+      - name: Generate sandbox & install hApp (in-process lair)
+        run: hc sandbox generate --in-process-lair --run=0 --app-id autonomous_me autonymous-me.happ
+        timeout-minutes: 10

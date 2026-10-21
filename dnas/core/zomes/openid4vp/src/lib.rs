@@ -397,7 +397,7 @@ fn make_kb_jwt(nonce: &str, aud: &str) -> ExternResult<String> {
         format!(r#"{{"nonce":"{}","aud":"{}","iat":0}}"#, nonce, aud).as_bytes(),
     );
     let signing_input = format!("{}.{}", hdr, pay);
-    let agent_key: AgentPubKey = agent_info()?.agent_latest_pubkey;
+    let agent_key: AgentPubKey = agent_info()?.agent_initial_pubkey;
     let sig = sign_raw(agent_key, signing_input.into_bytes())?;
     let sig_b64 = b64url(&sig.0);
     Ok(format!("{}.{}.{}", hdr, pay, sig_b64))

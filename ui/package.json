@@ -11,7 +11,7 @@
     "lint":     "eslint src --ext .ts,.js"
   },
   "dependencies": {
-    "@holochain/client": "^0.17.0"
+    "@holochain/client": "^0.20.0"
   },
   "devDependencies": {
     "vite":         "^5.0.0",
