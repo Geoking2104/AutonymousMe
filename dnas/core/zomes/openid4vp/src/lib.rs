@@ -334,12 +334,8 @@ fn parse_json_request(raw: &str) -> ExternResult<Parsed> {
         let pat = format!("\"{}\":", key);
         let i = s.find(&pat)? + pat.len();
         let rest = s[i..].trim_start();
-        if rest.starts_with('"') {
-            let inner = &rest[1..];
-            Some(inner[..inner.find('"')?].to_string())
-        } else {
-            None
-        }
+        let inner = rest.strip_prefix('"')?;
+        Some(inner[..inner.find('"')?].to_string())
     }
     Ok(Parsed {
         nonce: field(raw, "nonce")
