@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -12,9 +12,9 @@ env:
   HOLOCHAIN_VERSION: "0.6.1"
 
 jobs:
-  # ── Rust: check + test zomes ──────────────────────────────────────────────
+  # â”€â”€ Rust: check + test zomes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   zomes:
-    name: Zomes — check & test
+    name: Zomes â€” check & test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,9 +45,9 @@ jobs:
       - name: Clippy lint
         run: cargo clippy --workspace -- -D warnings
 
-  # ── JS: API + SDK + UI ────────────────────────────────────────────────────
+  # â”€â”€ JS: API + SDK + UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   js:
-    name: API / SDK / UI — build & test
+    name: API / SDK / UI â€” build & test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
           npm run build --workspace sdk && npm test --workspace sdk
           npm run build --workspace ui
 
-  # ── Pack hApp + web hApp bundles ─────────────────────────────────────────
+  # â”€â”€ Pack hApp + web hApp bundles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pack:
     name: Pack hApp & web hApp
     runs-on: ubuntu-latest
@@ -134,7 +134,7 @@ jobs:
           path: autonymous-me.webhapp
           retention-days: 30
 
-  # ── Security audit ────────────────────────────────────────────────────────
+  # â”€â”€ Security audit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   audit:
     name: Security audit
     runs-on: ubuntu-latest
@@ -146,12 +146,22 @@ jobs:
       - name: Run audit
         run: cargo audit
 
-  # ── Conductor smoke test ──────────────────────────────────────────────────
+  # -- Conductor e2e (live holochain 0.6.1) --
   conductor:
-    name: Conductor smoke test (hc sandbox)
+    name: Conductor e2e (live holochain 0.6.1)
     runs-on: ubuntu-latest
-    needs: [pack]
+    needs: [pack, js]
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install api dependencies
+        run: npm ci && cd api && npm ci
+
       - name: Download hApp artifact
         uses: actions/download-artifact@v4
         with:
@@ -164,6 +174,32 @@ jobs:
           chmod +x /usr/local/bin/holochain /usr/local/bin/hc
           holochain --version
 
-      - name: Generate sandbox & install hApp (in-process lair)
-        run: hc sandbox generate --in-process-lair --run=0 --app-id autonomous_me autonymous-me.happ
-        timeout-minutes: 10
+      # hc sandbox generate cannot run without a TTY (the conductor waits for
+      # a lair passphrase on stdin), so we drive a persistent conductor
+      # directly: create config, pin the admin port, start with --piped.
+      - name: Start conductor (piped passphrase, fixed admin port)
+        run: |
+          cd /tmp && holochain --create-config
+          sbx=$(dirname "$(find /tmp -maxdepth 2 -name conductor-config.yaml | sort | tail -1)")
+          echo "sandbox dir: $sbx"
+          sed -i 's/port: 0/port: 9100/' "$sbx/conductor-config.yaml"
+          echo pass | nohup holochain --piped -c "$sbx/conductor-config.yaml" > /tmp/conductor.log 2>&1 &
+          for i in $(seq 1 30); do
+            grep -q 'Conductor ready' /tmp/conductor.log && break
+            sleep 1
+          done
+          grep -q 'Conductor ready' /tmp/conductor.log || { cat /tmp/conductor.log; exit 1; }
+
+      - name: Install & enable hApp, attach app websocket
+        run: |
+          hc sandbox call --running 9100 install-app --app-id autonomous_me "$PWD/autonymous-me.happ" > /tmp/install.json
+          hc sandbox call --running 9100 enable-app autonomous_me
+          hc sandbox call --running 9100 add-app-ws 9000
+          head -c 300 /tmp/install.json; echo
+
+      - name: Run 13-check end-to-end verification (real zome calls)
+        run: node api/scripts/verify-conductor-06.mjs
+        env:
+          ADMIN_WS_URL: ws://localhost:9100
+          APP_WS_URL: ws://localhost:9000
+        timeout-minutes: 5
