@@ -24,6 +24,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: wasm32-unknown-unknown
+          components: clippy
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
