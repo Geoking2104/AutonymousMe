@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
     branches: [main]
 
 env:
-  RUST_VERSION: "1.77"
-  NODE_VERSION: "20"
-  HOLOCHAIN_VERSION: "0.4.1"
+  RUST_VERSION: "1.87"
+  NODE_VERSION: "22"
+  HOLOCHAIN_VERSION: "0.6.1"
 
 jobs:
-  # ── Rust: check + test zomes ──────────────────────────────────────────────
+  # â”€â”€ Rust: check + test zomes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   zomes:
-    name: Zomes — check & test
+    name: Zomes â€” check & test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +24,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
           targets: wasm32-unknown-unknown
+          components: clippy
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
@@ -36,19 +37,18 @@ jobs:
       - name: Unit tests
         run: cargo test --workspace
 
-      - name: Check wasm32 compilation
+      - name: Check wasm32 compilation (0.6 requires the getrandom custom backend)
         run: cargo build --release --target wasm32-unknown-unknown --workspace
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
       - name: Clippy lint
         run: cargo clippy --workspace -- -D warnings
 
-  # ── UI: lint + build ──────────────────────────────────────────────────────
-  ui:
-    name: UI — lint & build
+  # â”€â”€ JS: API + SDK + UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  js:
+    name: API / SDK / UI â€” build & test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ui
     steps:
       - uses: actions/checkout@v4
 
@@ -57,22 +57,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ui/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript check
-        run: npx tsc --noEmit
+      - name: Build & test workspaces
+        run: |
+          npm run build --workspace api && npm test --workspace api
+          npm run build --workspace sdk && npm test --workspace sdk
+          npm run build --workspace ui
 
-      - name: Build
-        run: npm run build
-
-  # ── Pack hApp bundle ──────────────────────────────────────────────────────
+  # â”€â”€ Pack hApp + web hApp bundles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pack:
-    name: Pack hApp
+    name: Pack hApp & web hApp
     runs-on: ubuntu-latest
-    needs: [zomes, ui]
+    needs: [zomes, js]
     steps:
       - uses: actions/checkout@v4
 
@@ -83,18 +82,43 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
 
-      - name: Build zomes
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install holochain CLI ${{ env.HOLOCHAIN_VERSION }}
+        run: |
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/hc-x86_64-unknown-linux-gnu" -o /usr/local/bin/hc
+          chmod +x /usr/local/bin/hc
+          hc --version
+
+      - name: Build zomes (wasm32, getrandom custom backend)
         run: cargo build --release --target wasm32-unknown-unknown --workspace
+        env:
+          RUSTFLAGS: '--cfg getrandom_backend="custom"'
 
-      - name: Install holochain CLI
-        run: cargo install holochain_cli --version ${{ env.HOLOCHAIN_VERSION }} --locked
+      - name: Copy coordinator wasms (distinct paths required by hc dna pack)
+        run: node scripts/copy-coordinator-wasms.mjs
 
-      - name: Pack DNA
-        run: hc dna pack dnas/autonymous/ --output dnas/autonymous/autonymous.dna
+      - name: Pack DNA (dnas/core is the canonical DNA)
+        run: hc dna pack dnas/core/ --output dnas/core/core.dna
 
       - name: Pack hApp
         run: hc app pack . --output autonymous-me.happ
+
+      - name: Build UI & pack web hApp
+        run: |
+          npm run build --workspace ui
+          cd ui && zip -r dist.zip dist && cd ..
+          hc web-app pack . --output autonymous-me.webhapp
 
       - name: Upload hApp artifact
         uses: actions/upload-artifact@v4
@@ -103,7 +127,14 @@ jobs:
           path: autonymous-me.happ
           retention-days: 30
 
-  # ── Security audit ────────────────────────────────────────────────────────
+      - name: Upload web hApp artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonymous-me-webhapp
+          path: autonymous-me.webhapp
+          retention-days: 30
+
+  # â”€â”€ Security audit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   audit:
     name: Security audit
     runs-on: ubuntu-latest
@@ -114,3 +145,61 @@ jobs:
         run: cargo install cargo-audit --locked
       - name: Run audit
         run: cargo audit
+
+  # -- Conductor e2e (live holochain 0.6.1) --
+  conductor:
+    name: Conductor e2e (live holochain 0.6.1)
+    runs-on: ubuntu-latest
+    needs: [pack, js]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install api dependencies
+        run: npm ci && cd api && npm ci
+
+      - name: Download hApp artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: autonymous-me-happ
+
+      - name: Install holochain + hc ${{ env.HOLOCHAIN_VERSION }}
+        run: |
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/holochain-x86_64-unknown-linux-gnu" -o /usr/local/bin/holochain
+          curl -L "https://github.com/holochain/holochain/releases/download/holochain-${{ env.HOLOCHAIN_VERSION }}/hc-x86_64-unknown-linux-gnu" -o /usr/local/bin/hc
+          chmod +x /usr/local/bin/holochain /usr/local/bin/hc
+          holochain --version
+
+      # hc sandbox generate cannot run without a TTY (the conductor waits for
+      # a lair passphrase on stdin), so we drive a persistent conductor
+      # directly: create config, pin the admin port, start with --piped.
+      - name: Start conductor (piped passphrase, fixed admin port)
+        run: |
+          cd /tmp && holochain --create-config
+          sbx=$(dirname "$(find /tmp -maxdepth 2 -name conductor-config.yaml | sort | tail -1)")
+          echo "sandbox dir: $sbx"
+          sed -i 's/port: 0/port: 9100/' "$sbx/conductor-config.yaml"
+          echo pass | nohup holochain --piped -c "$sbx/conductor-config.yaml" > /tmp/conductor.log 2>&1 &
+          for i in $(seq 1 30); do
+            grep -q 'Conductor ready' /tmp/conductor.log && break
+            sleep 1
+          done
+          grep -q 'Conductor ready' /tmp/conductor.log || { cat /tmp/conductor.log; exit 1; }
+
+      - name: Install & enable hApp, attach app websocket
+        run: |
+          hc sandbox call --running 9100 install-app --app-id autonomous_me "$PWD/autonymous-me.happ" > /tmp/install.json
+          hc sandbox call --running 9100 enable-app autonomous_me
+          hc sandbox call --running 9100 add-app-ws 9000
+          head -c 300 /tmp/install.json; echo
+
+      - name: Run 13-check end-to-end verification (real zome calls)
+        run: node api/scripts/verify-conductor-06.mjs
+        env:
+          ADMIN_WS_URL: ws://localhost:9100
+          APP_WS_URL: ws://localhost:9000
+        timeout-minutes: 5

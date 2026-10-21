@@ -1,5 +1,5 @@
-/**
- * Autonymous.me — Holochain UI client
+﻿/**
+ * Autonymous.me â€” Holochain UI client
  *
  * Wraps all zome calls with typed interfaces.
  * Connects to the local Holochain conductor via WebSocket.
@@ -17,7 +17,7 @@ import {
   type AgentPubKey,
 } from "@holochain/client";
 
-// ─────────────────────────────────────────── TYPES ─────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface DidRecord {
   did: string;
@@ -94,7 +94,7 @@ export interface PresentationRecordWithHash {
   record: PresentationRecord;
 }
 
-// ─────────────────────────────────────────── CLIENT ────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CLIENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const CONDUCTOR_URL   = "ws://localhost:8888";
 const APP_ID: InstalledAppId = "autonymous-me";
@@ -112,9 +112,19 @@ export class AutonClient {
   /** Connect to the local Holochain conductor. */
   static async connect(url = CONDUCTOR_URL): Promise<AutonClient> {
     const ws = await AppWebsocket.connect(url);
-    const info = await ws.appInfo({ installed_app_id: APP_ID });
-    if (!info) throw new Error(`hApp '${APP_ID}' is not installed`);
-    const myPubKey = info.agent_pub_key;
+    const info = await ws.appInfo();
+    const roleCells = info.cell_info[APP_ID] ?? info.cell_info[DNA_ROLE];
+    if (!roleCells || roleCells.length === 0) {
+      throw new Error(`hApp '${APP_ID}' is not installed`);
+    }
+    // Holochain 0.5+ serializes enums as { type, value }
+    const provisioned = roleCells.find(
+      (c: { type?: string }) => c.type === "provisioned",
+    ) as { value: { cell_id: [import("@holochain/client").AgentPubKey, import("@holochain/client").DnaHash] } } | undefined;
+    if (!provisioned) {
+      throw new Error(`hApp '${APP_ID}' has no provisioned cell`);
+    }
+    const myPubKey = provisioned.value.cell_id[0];
     return new AutonClient(ws, myPubKey);
   }
 
@@ -122,7 +132,7 @@ export class AutonClient {
     return this.myPubKey;
   }
 
-  // ── Identity Wallet zome ─────────────────────────────────────────────────
+  // â”€â”€ Identity Wallet zome â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /** Create a new DID for the given context. */
   async createDid(context: string): Promise<{ did: string; action_hash: ActionHash }> {
@@ -170,7 +180,7 @@ export class AutonClient {
     return this.call("identity_wallet", "get_audit_log", null);
   }
 
-  // ── OpenID4VP zome ───────────────────────────────────────────────────────
+  // â”€â”€ OpenID4VP zome â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Parse an openid4vp:// URI (from QR scan or deep link).
@@ -216,7 +226,7 @@ export class AutonClient {
     return this.call("openid4vp", "list_presentations", null);
   }
 
-  // ── High-level flow helpers ───────────────────────────────────────────────
+  // â”€â”€ High-level flow helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Full OpenID4VP flow in one call:
@@ -279,11 +289,10 @@ export class AutonClient {
     });
   }
 
-  // ── Internal ─────────────────────────────────────────────────────────────
+  // â”€â”€ Internal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private async call<T>(zome: string, fn_name: string, payload: unknown): Promise<T> {
     const result = await this.ws.callZome({
-      cap_secret:    null,
       role_name:     DNA_ROLE,
       zome_name:     zome,
       fn_name,
@@ -294,5 +303,5 @@ export class AutonClient {
   }
 }
 
-// ─────────────────────────────────────────── EXPORT ────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default AutonClient;

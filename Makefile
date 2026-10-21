@@ -1,8 +1,8 @@
-# Autonymous.me hApp — Makefile
+# Autonymous.me hApp — Makefile (Holochain 0.6)
 # Run `make help` for all available commands
 
-.PHONY: help setup build build-zomes pack-dna pack-happ \
-        run-conductor install-app reset-conductor \
+.PHONY: help setup build build-zomes copy-coordinator-wasms pack-dna pack-happ pack-webhapp \
+        run-conductor install-app reset-conductor sandbox \
         ui-dev ui-build \
         test test-unit test-integration \
         clean docker-build docker-run
@@ -18,33 +18,43 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 	  awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
-setup: ## Install all prerequisites (Rust wasm target + holochain CLI + node deps)
+setup: ## Install prerequisites (Rust wasm target + Node deps; use `nix develop` for the Holochain toolchain)
 	rustup target add wasm32-unknown-unknown
-	cargo install holochain_cli --locked || true
-	cd ui && npm install
+	npm install
 
 ## ─── Build ──────────────────────────────────────────────────────────────────
 
-build: build-zomes pack-dna pack-happ ui-build ## Full build
+build: build-zomes pack-dna pack-happ ui-build ## Full build (zomes, DNA, hApp, UI)
 
-build-zomes: ## Compile all zomes to wasm32
-	$(CARGO) build \
+build-zomes: ## Compile all zomes to wasm32 (0.6: getrandom custom backend)
+	RUSTFLAGS='--cfg getrandom_backend="custom"' $(CARGO) build \
 	  --release \
 	  --target wasm32-unknown-unknown \
 	  --workspace
 
-pack-dna: build-zomes ## Pack the Autonymous DNA bundle
-	$(HC) dna pack dnas/autonymous/ \
-	  --output dnas/autonymous/autonymous.dna
+copy-coordinator-wasms: ## Copy zome wasms to the distinct coordinator paths required by dna.yaml
+	$(NODE) scripts/copy-coordinator-wasms.mjs
+
+pack-dna: build-zomes copy-coordinator-wasms ## Pack the canonical DNA bundle (dnas/core)
+	$(HC) dna pack dnas/core/ \
+	  --output dnas/core/core.dna
 
 pack-happ: pack-dna ## Pack the hApp bundle
 	$(HC) app pack . \
 	  --output autonymous-me.happ
 
+pack-webhapp: pack-happ ui-build ## Pack the web hApp (hApp + UI) for Holochain runtimes
+	cd ui && zip -r dist.zip dist
+	$(HC) web-app pack . \
+	  --output autonymous-me.webhapp
+
 ## ─── Run ────────────────────────────────────────────────────────────────────
 
-run-conductor: ## Start the Holochain conductor
+run-conductor: ## Start the Holochain conductor (persistent config)
 	holochain --config-path conductor-config.yaml
+
+sandbox: pack-happ ## Generate & run a local sandbox conductor with the hApp installed
+	$(HC) sandbox generate --in-process-lair --run=9000 --app-id autonomous_me autonymous-me.happ
 
 install-app: pack-happ ## Install the hApp into a running conductor
 	$(HC) app install autonymous-me.happ
@@ -67,8 +77,8 @@ test: test-unit ## Run all tests
 test-unit: ## Run Rust unit tests (no conductor)
 	$(CARGO) test --workspace
 
-test-integration: pack-happ ## Run integration tests with a real conductor
-	$(HC) s generate --run tests/
+test-integration: pack-happ ## Generate a sandbox and run conductor-level integration checks
+	$(HC) sandbox generate --in-process-lair --run=0 --app-id autonomous_me autonymous-me.happ
 
 ## ─── Docker ─────────────────────────────────────────────────────────────────
 
@@ -76,11 +86,11 @@ docker-build: ## Build Docker image
 	docker build -t autonymous-me:latest .
 
 docker-run: docker-build ## Run via Docker
-	docker run -p 8888:8888 -p 3000:3000 autonymous-me:latest
+	docker run -p 8888:8888 -p 9000:9000 autonymous-me:latest
 
 ## ─── Utility ─────────────────────────────────────────────────────────────────
 
 clean: ## Remove all build artifacts
 	$(CARGO) clean
-	rm -f dnas/autonymous/autonymous.dna autonymous-me.happ
+	rm -f dnas/core/core.dna autonymous-me.happ autonymous-me.webhapp ui/dist.zip
 	cd ui && rm -rf dist node_modules

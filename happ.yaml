@@ -1,5 +1,5 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 
 name: autonomous_me
 description: >
@@ -13,7 +13,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: dnas/core/core.dna
+      path: dnas/core/core.dna
       modifiers:
         network_seed: ~
         properties: ~

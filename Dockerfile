@@ -1,16 +1,11 @@
 # ── Stage 1: Build Rust wasm zomes ────────────────────────────────────────
-FROM rust:1.77-slim AS zome-builder
+FROM rust:1.87-slim AS zome-builder
 
 RUN apt-get update && apt-get install -y \
     pkg-config libssl-dev curl git \
     && rm -rf /var/lib/apt/lists/*
 
-# Add wasm32 target
 RUN rustup target add wasm32-unknown-unknown
-
-# Install holochain CLI tools
-RUN cargo install holochain_cli --version 0.4.1 --locked 2>/dev/null || \
-    cargo install holochain_cli --locked
 
 WORKDIR /build
 
@@ -18,19 +13,21 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock* ./
 COPY dnas/ ./dnas/
 
-# Build all zomes for wasm32
+# Build all zomes for wasm32 (Holochain 0.6 requires the getrandom custom backend)
+ENV RUSTFLAGS='--cfg getrandom_backend="custom"'
 RUN cargo build \
     --release \
     --target wasm32-unknown-unknown \
     --workspace
 
-# Pack DNA and hApp bundles
-COPY happ.yaml dnas/autonymous/dna.yaml ./
-RUN hc dna pack dnas/autonymous/ --output dnas/autonymous/autonymous.dna || \
-    echo "hc dna pack unavailable in this build stage — using cargo output directly"
+# Copy coordinator wasms to the distinct paths required by dna.yaml
+RUN for z in identity_wallet openid4vp zk_prover; do \
+      cp target/wasm32-unknown-unknown/release/$z.wasm \
+         target/wasm32-unknown-unknown/release/${z}_coordinator.wasm; \
+    done
 
 # ── Stage 2: Build UI ─────────────────────────────────────────────────────
-FROM node:20-alpine AS ui-builder
+FROM node:22-alpine AS ui-builder
 
 WORKDIR /ui
 COPY ui/package*.json ./
@@ -46,22 +43,25 @@ RUN apt-get update && apt-get install -y \
     ca-certificates curl libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Holochain binary
-RUN curl -L https://github.com/holochain/holochain/releases/download/holochain-0.4.1/holochain-x86_64-unknown-linux-gnu \
-    -o /usr/local/bin/holochain && chmod +x /usr/local/bin/holochain || \
-    echo "Binary download failed — provide holochain binary manually"
+# Install Holochain 0.6.1 official release binaries (conductor + lair)
+ARG HOLOCHAIN_VERSION=0.6.1
+RUN curl -L "https://github.com/holochain/holochain/releases/download/holochain-${HOLOCHAIN_VERSION}/holochain-x86_64-unknown-linux-gnu" \
+      -o /usr/local/bin/holochain \
+    && curl -L "https://github.com/holochain/holochain/releases/download/holochain-${HOLOCHAIN_VERSION}/lair-keystore-x86_64-unknown-linux-gnu" \
+      -o /usr/local/bin/lair-keystore \
+    && chmod +x /usr/local/bin/holochain /usr/local/bin/lair-keystore \
+    && holochain --version
 
 WORKDIR /app
 
-# Copy built artifacts
+# Copy the DNA/hApp manifests and packed bundles are built at CI level;
+# this image runs a conductor with the app installed at startup.
 COPY --from=zome-builder /build/target/wasm32-unknown-unknown/release/*.wasm ./wasm/
-COPY --from=zome-builder /build/happ.yaml ./
 COPY --from=zome-builder /build/dnas/ ./dnas/
-COPY --from=ui-builder  /ui/dist/ ./ui/
-
-# Conductor config
+COPY happ.yaml flake.nix ./
+COPY --from=ui-builder /ui/dist/ ./ui/
 COPY conductor-config.yaml ./
 
-EXPOSE 8888 3000
+EXPOSE 8888 9000
 
 CMD ["holochain", "--config-path", "conductor-config.yaml"]

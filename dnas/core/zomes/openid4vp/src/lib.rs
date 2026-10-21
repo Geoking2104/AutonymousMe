@@ -334,12 +334,8 @@ fn parse_json_request(raw: &str) -> ExternResult<Parsed> {
         let pat = format!("\"{}\":", key);
         let i = s.find(&pat)? + pat.len();
         let rest = s[i..].trim_start();
-        if rest.starts_with('"') {
-            let inner = &rest[1..];
-            Some(inner[..inner.find('"')?].to_string())
-        } else {
-            None
-        }
+        let inner = rest.strip_prefix('"')?;
+        Some(inner[..inner.find('"')?].to_string())
     }
     Ok(Parsed {
         nonce: field(raw, "nonce")
@@ -397,7 +393,7 @@ fn make_kb_jwt(nonce: &str, aud: &str) -> ExternResult<String> {
         format!(r#"{{"nonce":"{}","aud":"{}","iat":0}}"#, nonce, aud).as_bytes(),
     );
     let signing_input = format!("{}.{}", hdr, pay);
-    let agent_key: AgentPubKey = agent_info()?.agent_latest_pubkey;
+    let agent_key: AgentPubKey = agent_info()?.agent_initial_pubkey;
     let sig = sign_raw(agent_key, signing_input.into_bytes())?;
     let sig_b64 = b64url(&sig.0);
     Ok(format!("{}.{}.{}", hdr, pay, sig_b64))
