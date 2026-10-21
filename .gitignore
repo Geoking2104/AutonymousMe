@@ -44,6 +44,3 @@ api/dist/
 .hc_live_*
 
 
-# Root npm workspace
-/node_modules/
-/package-lock.json
