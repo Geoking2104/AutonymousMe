@@ -10,6 +10,8 @@
 //! The Holochain Source Chain provides immutable local ordering and peer validation.
 
 use hdk::prelude::*;
+use hdi::flat_op::FlatOp;
+use hdi::flat_op::OpEntry;
 use serde::{Deserialize, Serialize};
 
 // ??????????????????????????????? ENTRY TYPES ???????????????????????????????
@@ -306,23 +308,22 @@ pub fn get_audit_log(_: ()) -> ExternResult<Vec<AuditEntryWithHash>> {
 
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
-    // Only validate Store operations
-    let Op::StoreEntry(store_entry) = op else {
+    // Holochain 0.7: Op must be flattened, and FlatOp::CreateEntry carries
+    // the already-deserialized app entry (no manual SerializedBytes probing).
+    let flat = op.flattened::<EntryTypes, LinkTypes>()?;
+    let FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. }) = flat else {
         return Ok(ValidateCallbackResult::Valid);
     };
 
-    // Validate DidRecord entries
-    if let Entry::App(bytes) = &store_entry.entry {
-        let sb = SerializedBytes::from(bytes.clone());
-        if let Ok(did) = DidRecord::try_from(sb.clone()) {
+    match app_entry {
+        EntryTypes::DidRecord(did) => {
             if !did.did.starts_with("did:hc:") {
                 return Ok(ValidateCallbackResult::Invalid(
                     "DID must use the did:hc method".into(),
                 ));
             }
-            return Ok(ValidateCallbackResult::Valid);
         }
-        if let Ok(cred) = StoredCredential::try_from(sb) {
+        EntryTypes::StoredCredential(cred) => {
             if cred.id.is_empty() {
                 return Ok(ValidateCallbackResult::Invalid(
                     "Credential ID is required".into(),
@@ -335,6 +336,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 ));
             }
         }
+        EntryTypes::AuditEntry(_) => {}
     }
 
     Ok(ValidateCallbackResult::Valid)

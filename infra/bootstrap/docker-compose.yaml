@@ -1,0 +1,43 @@
+services:
+  bootstrap:
+    image: ghcr.io/holochain/kitsune2_bootstrap_srv:v0.3.2
+    command:
+      - kitsune2-bootstrap-srv
+      - --production
+      - --listen
+      - "[::]:443"
+      # Replace with the TLS certificate paths for your domain, mounted below.
+      - --tls-cert
+      - /etc/letsencrypt/live/bootstrap.example.org/fullchain.pem
+      - --tls-key
+      - /etc/letsencrypt/live/bootstrap.example.org/privkey.pem
+    environment:
+      - RUST_LOG=info
+    ports:
+      - "443:443"
+    volumes:
+      # Adjust to the TLS certificate location on the host (Let's Encrypt/certbot
+      # in this example; any trusted CA works).
+      - /etc/letsencrypt/:/etc/letsencrypt/:ro
+    restart: unless-stopped
+
+  # Optional: serve a second instance as dedicated signal/relay to spread load
+  # (same binary, same image; point the conductor's signal_url at it).
+  # signal:
+  #   image: ghcr.io/holochain/kitsune2_bootstrap_srv:v0.3.2
+  #   command:
+  #     - kitsune2-bootstrap-srv
+  #     - --production
+  #     - --listen
+  #     - "[::]:443"
+  #     - --tls-cert
+  #     - /etc/letsencrypt/live/signal.example.org/fullchain.pem
+  #     - --tls-key
+  #     - /etc/letsencrypt/live/signal.example.org/privkey.pem
+  #   environment:
+  #     - RUST_LOG=info
+  #   ports:
+  #     - "443:443"
+  #   volumes:
+  #     - /etc/letsencrypt/:/etc/letsencrypt/:ro
+  #   restart: unless-stopped

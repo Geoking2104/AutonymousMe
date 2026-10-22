@@ -16,18 +16,20 @@ Autonymous.me is an **open-source, non-profit, community-governed protocol** for
 
 ---
 
-## Current status: migrated to Holochain 0.6 — DNA, Zomes, ZK circuit, SDK, REST API implemented and verified end-to-end against a live 0.6.1 conductor
+## Current status: migrated to Holochain 0.7 — DNA, Zomes, ZK circuit, SDK, REST API implemented and verified end-to-end against live conductors (0.6.1 and 0.7.1)
 
-This repository has moved from specification to working, independently-verified code, and has been migrated from Holochain 0.4 to **Holochain 0.6** (kitsune2 + iroh/QUIC network stack, manifest_version "0", hdk 0.6.1 / hdi 0.7.1, @holochain/client 0.20):
+This repository has moved from specification to working, independently-verified code, and has been migrated from Holochain 0.4 to **Holochain 0.7** (kitsune2 + iroh/QUIC, action model `header`+`data`, hdk 0.7.1 / hdi 0.8.1, @holochain/client 0.21) — after an intermediate, fully-verified stop on 0.6 (merge #1):
 
-- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.6.1 / HDI 0.7.1. All three compile to wasm32-unknown-unknown in release mode (with the 0.6-required `--cfg getrandom_backend="custom"`) and pass 13 integration tests.
+- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.7.1 / HDI 0.8.1. All three compile to wasm32-unknown-unknown in release mode (with the `--cfg getrandom_backend="custom"` flag) and pass 13 integration tests + clippy `-D warnings`. The 0.7 action-model rewrite is applied: `validate` callbacks flatten the `Op` (`op.flattened::<EntryTypes, LinkTypes>()`) and match on the typed `FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. })` — stricter than the old raw-bytes probing.
 - A real zk-SNARK circuit (circuits/age_check, Circom 2.1.4) proving age >= 18 without revealing date of birth, verified with a real (dev-only) Groth16 trusted setup: witness correctness, proof generation, and cryptographic verification.
 - A verifier-facing TypeScript SDK (sdk/), 9 passing unit tests, local offline zk proof verification via snarkjs.
 - A REST API (api/, Node/Express) implementing the OpenID4VP request/callback, DID resolution, and credential status endpoints, 12 passing tests against an in-memory backend.
-- A Holochain-backed implementation of that same REST API (api/src/backends/holochainBackend.ts), **verified end-to-end against a real `holochain` 0.6.1 conductor**: real DID creation and read-back, real audit-log writes, real presentation recording and listing, real credential-status lookups — all with actual source-chain writes and reads, through the 0.5+ `{type, value}` enum wire format. See api/scripts/verify-conductor-06.mjs for the exact reproducible scenario (all 13 checks green on 2026-10-21).
-- The DNA package lives in `dnas/core` (the legacy `dnas/autonomous` directory has been removed; its sources were confirmed byte-identical apart from comment encoding before deletion). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
+- A Holochain-backed implementation of that same REST API, **verified end-to-end against real conductors on both 0.6.1 and 0.7.1** (api/scripts/verify-conductor-06.mjs and verify-conductor-07.mjs — 13 checks each: real DID creation/read-back, audit-log writes, presentation recording/listing, real source-chain writes/reads). Note: `hc sandbox call` was removed in 0.7; the 0.7 script installs, enables and exercises the hApp purely over the admin/app websockets.
+- **Multi-agent scenario (tests/)**: a Tryorama 2-agent scenario (community package `@holochain-open-dev/tryorama` 0.20) spins up two independent conductors on a mem network and runs the full holder flow on each — 12 checks, all green on 0.7.1.
+- The DNA package lives in `dnas/core` (the legacy `dnas/autonomous` directory was removed after byte-identical confirmation). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
+- Self-hosted network infrastructure kit (infra/bootstrap/): docker-compose + runbook for `kitsune2-bootstrap-srv` (peer discovery / signalling), so production deployments do not depend on the rate-limited public dev-test servers.
 
-What remains: the wallet UI (`ui/`) compiles and its client has been updated to `@holochain/client` 0.20 (0.5+ enum shapes, no nullable cap_secret), but it has not yet been re-verified interactively against the current zomes, and the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md).
+What remains: the wallet UI (`ui/`) compiles (client 0.21, 0.5+ enum shapes, no nullable cap_secret) but has not yet been re-verified interactively against the current zomes; the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md); Holochain 0.7 has no data-migration path, so this jump happened before any real user data existed (by design).
 
 If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: get in touch via [Issues](https://github.com/Geoking2104/AutonymousMe/issues) or support@autonymous.me.
 ---
@@ -179,19 +181,19 @@ The recommended toolchain is the Holonix Nix environment (see
 [developer.holochain.org/get-started](https://developer.holochain.org/get-started/)):
 
 ```bash
-nix develop                    # holochain 0.6.x, hc, node 22, binaryen
-npm install                    # root workspace (ui, api, sdk)
+nix develop                    # holochain 0.7.x, hc, node 22, binaryen
+npm install                    # root workspace (ui, api, sdk, tests)
 ```
 
 Without Nix (any OS with Rust + Node 22): download the `hc` and `holochain`
-0.6.1 binaries from the [holochain releases](https://github.com/holochain/holochain/releases/tag/holochain-0.6.1)
+0.7.1 binaries from the [holochain releases](https://github.com/holochain/holochain/releases/tag/holochain-0.7.1)
 and make sure they are on your PATH, then:
 
 ```bash
 # Prerequisites: Rust + rustup, wasm32-unknown-unknown target
 rustup target add wasm32-unknown-unknown
 
-# 0.6 requires the getrandom custom backend during wasm builds
+# 0.6+ requires the getrandom custom backend during wasm builds
 RUSTFLAGS='--cfg getrandom_backend="custom"' \
   cargo build --release --target wasm32-unknown-unknown --workspace
 
@@ -218,24 +220,51 @@ npm run setup:phase2 && npm run prove && npm run verify
 
 ### Run against a live conductor (end-to-end verification)
 
+**Holochain 0.7** (recommended — `hc sandbox call` no longer exists; the script
+does everything over the websockets, including install & enable):
+
 ```bash
-# with the above bundles built, and hc/holochain 0.6.1 on PATH (Linux/WSL):
-holochain --create-config                       # or any sandbox config
-# set a fixed admin port in the generated conductor-config.yaml, then:
+# with the bundles built and holochain 0.7.1 on PATH (Linux/WSL for the conductor):
+holochain --create-config
+# set a fixed admin port (e.g. 9100) in the generated conductor-config.yaml, then:
 echo pass | holochain --piped -c conductor-config.yaml &
 
+# from api/ (Node 22):
+cd api && npm ci
+ADMIN_WS_URL=ws://localhost:9100 APP_WS_URL=ws://localhost:9000 \
+  HAPP_PATH=../autonymous-me.happ node scripts/verify-conductor-07.mjs
+```
+
+**Holochain 0.6** (for environments still pinned there):
+
+```bash
 hc sandbox call --running <admin-port> install-app --app-id autonomous_me /abs/path/autonymous-me.happ
 hc sandbox call --running <admin-port> enable-app autonomous_me
 hc sandbox call --running <admin-port> add-app-ws 9000
-
-# from api/ (Node 22): the 13-check end-to-end scenario
-cd api && npm ci && node scripts/verify-conductor-06.mjs
+cd api && node scripts/verify-conductor-06.mjs
 ```
 
-api/scripts/verify-conductor-06.mjs exercises: admin/app websocket connect,
-app auth token, signing credentials, `create_did` → `get_my_did` →
-`get_audit_log` → `record_presentation` → `list_presentations` →
-`list_zk_proofs`, asserting real source-chain writes and reads.
+Both scripts exercise: admin/app websocket connect, app auth token, signing
+credentials, `create_did` → `get_my_did` → `get_audit_log` →
+`record_presentation` → `list_presentations` → `list_zk_proofs`, asserting
+real source-chain writes and reads (13 checks each).
+
+### Multi-agent scenario (Tryorama)
+
+```bash
+# with holochain/hc/kitsune2-bootstrap-srv on PATH (they are spawned per-agent)
+HAPP_PATH=/abs/path/autonymous-me.happ npm test --workspace tests
+```
+
+Two independent conductors on a mem network each run the full holder flow
+(create_did → get_my_did → audit → record_presentation → list_presentations) —
+12 checks.
+
+### Self-hosted network infrastructure
+
+See [infra/bootstrap/README.md](infra/bootstrap/README.md) for the
+`kitsune2-bootstrap-srv` docker-compose kit and runbook (production hApps
+should not rely on the public dev-test bootstrap servers).
 ---
 
 ## Contributing
@@ -277,8 +306,8 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 1 - Core protocol design | Done | DID method, zk circuit design, SD-JWT schema - see Technical_Specifications.docx |
-| 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests passing); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) — all on Holochain 0.6 (hdk 0.6.1 / hdi 0.7.1) |
-| 3 - End-to-end integration | Done for the REST API / Holochain backend | HolochainBackend verified end-to-end against a live `holochain` **0.6.1** conductor (13-check scenario in api/scripts/verify-conductor-06.mjs: real DID + audit + presentation round trips). Wallet UI (ui/) still needs interactive re-verification against the current zomes |
+| 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests + clippy clean); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) — all on Holochain 0.7 (hdk 0.7.1 / hdi 0.8.1) |
+| 3 - End-to-end integration | Done for the REST API / Holochain backend + multi-agent | HolochainBackend verified end-to-end against live conductors **0.6.1 and 0.7.1** (13-check scenarios: api/scripts/verify-conductor-06.mjs & verify-conductor-07.mjs); Tryorama 2-agent scenario (12 checks) on 0.7.1. Wallet UI (ui/) still needs interactive re-verification against the current zomes |
 | 4 - Issuer registry & production trusted setup | Not started | DHT-based issuer registry; production-grade Powers of Tau ceremony (current one is dev-only) |
 | 5 - Mobile app & governance | Planned | iOS/Android, community governance v1 |
 | 6 - eIDAS 2.0 production | Planned | Certification, EUDI Wallet bridge |
