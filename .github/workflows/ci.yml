@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  RUST_VERSION: "1.90"
+  RUST_VERSION: "1.95"
   NODE_VERSION: "22"
   HOLOCHAIN_VERSION: "0.7.1"
 
