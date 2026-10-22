@@ -1,4 +1,4 @@
-# ── Stage 1: Build Rust wasm zomes ────────────────────────────────────────
+# â”€â”€ Stage 1: Build Rust wasm zomes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 FROM rust:1.87-slim AS zome-builder
 
 RUN apt-get update && apt-get install -y \
@@ -26,7 +26,7 @@ RUN for z in identity_wallet openid4vp zk_prover; do \
          target/wasm32-unknown-unknown/release/${z}_coordinator.wasm; \
     done
 
-# ── Stage 2: Build UI ─────────────────────────────────────────────────────
+# â”€â”€ Stage 2: Build UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 FROM node:22-alpine AS ui-builder
 
 WORKDIR /ui
@@ -36,15 +36,15 @@ RUN npm ci --prefer-offline
 COPY ui/ ./
 RUN npm run build
 
-# ── Stage 3: Runtime — Holochain conductor ────────────────────────────────
+# â”€â”€ Stage 3: Runtime â€” Holochain conductor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 FROM debian:bookworm-slim AS runtime
 
 RUN apt-get update && apt-get install -y \
     ca-certificates curl libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Holochain 0.6.1 official release binaries (conductor + lair)
-ARG HOLOCHAIN_VERSION=0.6.1
+# Install Holochain 0.7.1 official release binaries (conductor + lair)
+ARG HOLOCHAIN_VERSION=0.7.1
 RUN curl -L "https://github.com/holochain/holochain/releases/download/holochain-${HOLOCHAIN_VERSION}/holochain-x86_64-unknown-linux-gnu" \
       -o /usr/local/bin/holochain \
     && curl -L "https://github.com/holochain/holochain/releases/download/holochain-${HOLOCHAIN_VERSION}/lair-keystore-x86_64-unknown-linux-gnu" \

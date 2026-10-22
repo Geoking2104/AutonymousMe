@@ -25,6 +25,8 @@
 //! without leaving Holochain.
 
 use hdk::prelude::*;
+use hdi::flat_op::FlatOp;
+use hdi::flat_op::OpEntry;
 use serde::{Deserialize, Serialize};
 
 // --------------------------------------------------------------- ENTRY TYPES
@@ -236,31 +238,29 @@ pub fn check_proof_shape(input: CheckProofShapeInput) -> ExternResult<CheckProof
 
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
-    let Op::StoreEntry(store_entry) = op else {
+    // Holochain 0.7: flatten Op; FlatOp::CreateEntry carries the typed entry.
+    let flat = op.flattened::<EntryTypes, LinkTypes>()?;
+    let FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. }) = flat else {
         return Ok(ValidateCallbackResult::Valid);
     };
 
-    if let Entry::App(bytes) = &store_entry.entry {
-        let sb = SerializedBytes::from(bytes.clone());
-        if let Ok(proof) = ZkProofRecord::try_from(sb) {
-            if proof.credential_id.is_empty() {
-                return Ok(ValidateCallbackResult::Invalid(
-                    "credential_id is required".into(),
-                ));
-            }
-            if proof.proof_type != "groth16" {
-                return Ok(ValidateCallbackResult::Invalid(
-                    "Only groth16 proofs are supported in this version".into(),
-                ));
-            }
-            if proof.credential_hash.len() != 64
-                || !proof.credential_hash.chars().all(|c| c.is_ascii_hexdigit())
-            {
-                return Ok(ValidateCallbackResult::Invalid(
-                    "credential_hash must be a 64-char hex sha256 digest".into(),
-                ));
-            }
-        }
+    let EntryTypes::ZkProofRecord(proof) = app_entry;
+    if proof.credential_id.is_empty() {
+        return Ok(ValidateCallbackResult::Invalid(
+            "credential_id is required".into(),
+        ));
+    }
+    if proof.proof_type != "groth16" {
+        return Ok(ValidateCallbackResult::Invalid(
+            "Only groth16 proofs are supported in this version".into(),
+        ));
+    }
+    if proof.credential_hash.len() != 64
+        || !proof.credential_hash.chars().all(|c| c.is_ascii_hexdigit())
+    {
+        return Ok(ValidateCallbackResult::Invalid(
+            "credential_hash must be a 64-char hex sha256 digest".into(),
+        ));
     }
 
     Ok(ValidateCallbackResult::Valid)
