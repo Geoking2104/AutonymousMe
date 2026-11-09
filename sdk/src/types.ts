@@ -84,6 +84,22 @@ export interface CredentialStatusResult {
   revokedAt?: string;
 }
 
+export interface RegisterIssuerOptions {
+  displayName: string;
+  credentialTypes: string[];
+  verificationMethod: string;
+}
+
+export interface IssuerRecord {
+  actionHash: string;
+  issuerDid: Did;
+  displayName: string;
+  credentialTypes: string[];
+  verificationMethod: string;
+  controller: string;
+  registeredAt: string;
+}
+
 export interface AutonymousVerifierClientConfig {
   /** Base URL of the Autonymous.me verifier REST API, e.g. https://api.autonymous.me */
   baseUrl: string;

@@ -4,8 +4,10 @@ import type {
   CredentialStatusResult,
   Did,
   DidDocumentResult,
+  IssuerRecord,
   OpenId4VpRequestBody,
   OpenId4VpRequestRecord,
+  RegisterIssuerBody,
 } from "../types.js";
 
 /**
@@ -18,6 +20,7 @@ export class InMemoryBackend implements AutonymousBackend {
   private readonly requests = new Map<string, OpenId4VpRequestRecord>();
   private readonly revokedCredentials = new Set<string>();
   private readonly knownCredentials = new Set<string>();
+  private readonly issuers = new Map<string, IssuerRecord>();
 
   /** Test/dev helper: seed a credential so status checks have something real to answer. */
   seedCredential(credentialId: string, revoked = false): void {
@@ -85,5 +88,28 @@ export class InMemoryBackend implements AutonymousBackend {
       checkedAt: new Date().toISOString(),
       revokedAt: revoked ? new Date().toISOString() : undefined,
     };
+  }
+
+  async registerIssuer(body: RegisterIssuerBody): Promise<IssuerRecord> {
+    const id = randomUUID();
+    const issuer: IssuerRecord = {
+      actionHash: `memory:${id}`,
+      issuerDid: `did:hc:dev-${id}`,
+      displayName: body.displayName,
+      credentialTypes: [...body.credentialTypes],
+      verificationMethod: body.verificationMethod,
+      controller: `dev-${id}`,
+      registeredAt: new Date().toISOString(),
+    };
+    this.issuers.set(issuer.issuerDid, issuer);
+    return issuer;
+  }
+
+  async getIssuer(issuerDid: Did): Promise<IssuerRecord | undefined> {
+    return this.issuers.get(issuerDid);
+  }
+
+  async listIssuers(): Promise<IssuerRecord[]> {
+    return [...this.issuers.values()];
   }
 }

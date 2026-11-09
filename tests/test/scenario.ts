@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Multi-agent Tryorama scenario for the Autonymous.me hApp.
  *
  * Two players (Alice, Bob) each get their own conductor running the hApp,
@@ -19,7 +19,7 @@ import { encodeHashToBase64 } from "@holochain/client";
 const HAPP_PATH =
   process.env.HAPP_PATH ?? new URL("../../autonymous-me.happ", import.meta.url).pathname;
 
-const ROLE = "autonomous";
+const ROLE = "autonymous";
 
 interface DidOutput {
   did: string;

@@ -10,6 +10,9 @@ Technical_Specifications.docx section 8:
 | GET | `/api/v1/openid4vp/request/:requestId` | Verifier polls request/response status |
 | GET | `/api/v1/did/:did` | Resolve a DID to its DID Document |
 | GET | `/api/v1/credential/:credentialId/status` | Check credential revocation status |
+| POST | `/api/v1/issuers` | Publish the connected agent's issuer profile |
+| GET | `/api/v1/issuers` | List discoverable issuer profiles |
+| GET | `/api/v1/issuers/:issuerDid` | Resolve an issuer profile |
 | GET | `/health` | Liveness check |
 
 ## Architecture
@@ -21,16 +24,18 @@ not on any specific storage. Two implementations exist:
   Used for local development and by the full test suite. State lives in
   process memory and is lost on restart.
 - **`HolochainBackend`** (`src/backends/holochainBackend.ts`) - calls the
-  `identity_wallet` and `zk_prover` zomes over a Holochain conductor's app
-  websocket.
+  wallet, OpenID4VP, proof, and issuer-registry zomes over a Holochain
+  conductor's authenticated app websocket.
 
-**Status: verified against a live conductor (2026-07-25).** `HolochainBackend`
-was connected to a real `holochain` 0.4.1 conductor started via `hc sandbox`
+**Status:** the earlier `HolochainBackend` flow was verified against a real
+Holochain 0.4.1 conductor on 2026-07-25. That historical run confirmed
 (see `scripts/verify-conductor.mjs`). Confirmed working end-to-end: admin
 websocket connect, app authentication token issuance, signing-credential
 authorization, and real zome calls (`identity_wallet::create_did`,
 `get_my_did`, `zk_prover::list_zk_proofs`) with real source-chain writes and
-reads - not mocked.
+reads - not mocked. The adapter now targets Holochain 0.7.0 and
+`@holochain/client` 0.21.0, but needs a new fresh-state live run because 0.7
+does not migrate the old conductor databases.
 
 That verification also corrected real bugs found only by running against a
 live conductor: the `dna.yaml` manifest schema (`integrity_zomes`/
@@ -55,7 +60,7 @@ To run the API against a live conductor yourself:
 
 ```bash
 # from the repo root, with dnas/core built and packed (see repo root README)
-hc sandbox generate --in-process-lair --run=9000 --app-id autonomous_me autonomous_me.happ
+hc sandbox generate --in-process-lair --run=9000 --app-id autonymous_me autonymous-me.happ
 
 # in another terminal, from api/
 $env:AUTONYMOUS_BACKEND = "holochain"   # PowerShell; use export on bash/zsh

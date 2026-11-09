@@ -89,6 +89,20 @@ export interface PresentationRecord {
   outcome: string;
 }
 
+
+export interface IssuerRecord {
+  issuer_did: string;
+  display_name: string;
+  credential_types: string[];
+  verification_method: string;
+  controller: AgentPubKey;
+  registered_at: string;
+}
+
+export interface IssuerRecordWithHash {
+  action_hash: ActionHash;
+  issuer: IssuerRecord;
+}
 export interface PresentationRecordWithHash {
   action_hash: ActionHash;
   record: PresentationRecord;
@@ -290,6 +304,27 @@ export class AutonClient {
   }
 
   // â”€â”€ Internal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+  // ── Phase 4 issuer registry zome ────────────────────────────────────────
+
+  /** Publish this agent's immutable, self-certified issuer profile. */
+  async registerIssuer(params: {
+    display_name: string;
+    credential_types: string[];
+    verification_method: string;
+  }): Promise<IssuerRecordWithHash> {
+    return this.call("issuer_registry", "register_issuer", params);
+  }
+
+  /** Resolve a public issuer profile from the Holochain DHT. */
+  async getIssuer(issuerDid: string): Promise<IssuerRecordWithHash | null> {
+    return this.call("issuer_registry", "get_issuer", issuerDid);
+  }
+
+  /** List issuer profiles discoverable through the shared DHT index. */
+  async listIssuers(): Promise<IssuerRecordWithHash[]> {
+    return this.call("issuer_registry", "list_issuers", null);
+  }
 
   private async call<T>(zome: string, fn_name: string, payload: unknown): Promise<T> {
     const result = await this.ws.callZome({

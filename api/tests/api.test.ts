@@ -116,6 +116,45 @@ describe("Autonymous.me REST API", () => {
     });
   });
 
+  describe("issuer registry", () => {
+    const registration = {
+      displayName: "Example Qualified Issuer",
+      credentialTypes: ["AgeCredential", "IdentityCredential"],
+      verificationMethod: "did:hc controller key",
+    };
+
+    it("rejects an incomplete issuer registration", async () => {
+      const res = await request(app).post("/api/v1/issuers").send({});
+      expect(res.status).toBe(400);
+    });
+
+    it("registers, lists, and resolves an issuer", async () => {
+      const created = await request(app)
+        .post("/api/v1/issuers")
+        .send(registration);
+      expect(created.status).toBe(201);
+      expect(created.body.issuerDid).toMatch(/^did:hc:/);
+      expect(created.body.credentialTypes).toEqual(registration.credentialTypes);
+
+      const listed = await request(app).get("/api/v1/issuers");
+      expect(listed.status).toBe(200);
+      expect(listed.body).toHaveLength(1);
+
+      const resolved = await request(app).get(
+        `/api/v1/issuers/${encodeURIComponent(created.body.issuerDid)}`,
+      );
+      expect(resolved.status).toBe(200);
+      expect(resolved.body.displayName).toBe(registration.displayName);
+    });
+
+    it("404s for an unknown issuer", async () => {
+      const res = await request(app).get(
+        `/api/v1/issuers/${encodeURIComponent("did:hc:unknown")}`,
+      );
+      expect(res.status).toBe(404);
+    });
+  });
+
   it("returns 404 JSON for unknown routes", async () => {
     const res = await request(app).get("/nope");
     expect(res.status).toBe(404);

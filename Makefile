@@ -54,7 +54,7 @@ run-conductor: ## Start the Holochain conductor (persistent config)
 	holochain --config-path conductor-config.yaml
 
 sandbox: pack-happ ## Generate & run a local sandbox conductor with the hApp installed
-	$(HC) sandbox generate --in-process-lair --run=9000 --app-id autonomous_me autonymous-me.happ
+	$(HC) sandbox generate --in-process-lair --run=9000 --app-id autonymous_me autonymous-me.happ
 
 install-app: pack-happ ## Install the hApp into a running conductor
 	$(HC) app install autonymous-me.happ
@@ -78,7 +78,7 @@ test-unit: ## Run Rust unit tests (no conductor)
 	$(CARGO) test --workspace
 
 test-integration: pack-happ ## Generate a sandbox and run conductor-level integration checks
-	$(HC) sandbox generate --in-process-lair --run=0 --app-id autonomous_me autonymous-me.happ
+	$(HC) sandbox generate --in-process-lair --run=0 --app-id autonymous_me autonymous-me.happ
 
 ## ─── Docker ─────────────────────────────────────────────────────────────────
 

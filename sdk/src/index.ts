@@ -3,8 +3,10 @@ import type {
   CredentialStatusResult,
   Did,
   DidResolutionResult,
+  IssuerRecord,
   OpenId4VpRequestOptions,
   OpenId4VpRequestResponse,
+  RegisterIssuerOptions,
   VpTokenPayload,
   VpTokenVerificationResult,
   ZkProofClaim,
@@ -35,6 +37,7 @@ export class AutonymousApiError extends Error {
  *   POST /api/v1/openid4vp/request
  *   GET  /api/v1/did/{did}
  *   GET  /api/v1/credential/{credentialId}/status
+ *   GET  /api/v1/issuers/{issuerDid}
  *
  * Structural zk-SNARK proof verification (Groth16/BN128) is done locally via
  * snarkjs against a verification key fetched from `vkUri`, so a verifier does
@@ -85,6 +88,23 @@ export class AutonymousVerifierClient {
     return this.get<CredentialStatusResult>(
       `/api/v1/credential/${encodeURIComponent(credentialId)}/status`,
     );
+  }
+
+  /** Publish the connected Holochain agent's self-certifying issuer profile. */
+  async registerIssuer(options: RegisterIssuerOptions): Promise<IssuerRecord> {
+    return this.post<IssuerRecord>("/api/v1/issuers", options);
+  }
+
+  /** Resolve a self-certified issuer profile from the Holochain DHT. */
+  async getIssuer(issuerDid: Did): Promise<IssuerRecord> {
+    return this.get<IssuerRecord>(
+      `/api/v1/issuers/${encodeURIComponent(issuerDid)}`,
+    );
+  }
+
+  /** List issuer profiles currently discoverable through the DHT index. */
+  async listIssuers(): Promise<IssuerRecord[]> {
+    return this.get<IssuerRecord[]>("/api/v1/issuers");
   }
 
   /**

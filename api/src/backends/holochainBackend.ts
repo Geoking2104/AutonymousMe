@@ -1,23 +1,35 @@
 import { randomUUID, randomBytes } from "node:crypto";
-import type { AppWebsocket } from "@holochain/client";
+import {
+  encodeHashToBase64,
+  type ActionHash,
+  type AgentPubKey,
+  type AppWebsocket,
+} from "@holochain/client";
 import type { AutonymousBackend } from "../backend.js";
 import type {
   CredentialStatusResult,
   Did,
   DidDocumentResult,
+  IssuerRecord,
   OpenId4VpRequestBody,
   OpenId4VpRequestRecord,
+  RegisterIssuerBody,
 } from "../types.js";
 
 /**
  * Holochain-backed implementation of AutonymousBackend, calling into the
- * `identity_wallet` and `zk_prover` zomes over the conductor's app websocket.
+ * wallet, presentation, proof, and issuer-registry zomes over the conductor's
+ * app websocket.
  *
- * VERIFIED 2026-07-25 against a live `holochain` 0.4.1 conductor started via
+ * The Phase 1-3 adapter was verified 2026-07-25 against a live Holochain
+ * 0.4.1 conductor started via
  * `hc sandbox`: connected an AdminWebsocket + AppWebsocket, authorized signing
  * credentials for the cell, and successfully called `identity_wallet::create_did`
  * and `identity_wallet::get_my_did` end-to-end (real DID written to and read
- * back from the source chain), plus `zk_prover::list_zk_proofs`.
+ * back from the source chain), plus `zk_prover::list_zk_proofs`. The 0.7.0
+ * migration compiles and is covered by adapter tests, but still requires a
+ * fresh live-conductor verification because 0.7 has no database migration
+ * path from earlier releases.
  *
  * IMPORTANT ARCHITECTURAL FINDING from that verification: the real zome
  * function signatures do NOT match a naive 1:1 mapping of the REST API's
@@ -47,7 +59,7 @@ export class HolochainBackend implements AutonymousBackend {
 
   constructor(
     private readonly appWs: AppWebsocket,
-    private readonly roleName: string = "autonomous",
+    private readonly roleName: string = "autonymous",
   ) {}
 
   private async callZome<T>(
@@ -150,5 +162,60 @@ export class HolochainBackend implements AutonymousBackend {
         : undefined,
     };
   }
+
+  async registerIssuer(body: RegisterIssuerBody): Promise<IssuerRecord> {
+    const result = await this.callZome<HolochainIssuerRecord>(
+      "issuer_registry",
+      "register_issuer",
+      {
+        display_name: body.displayName,
+        credential_types: body.credentialTypes,
+        verification_method: body.verificationMethod,
+      },
+    );
+    return mapIssuerRecord(result);
+  }
+
+  async getIssuer(issuerDid: Did): Promise<IssuerRecord | undefined> {
+    const result = await this.callZome<HolochainIssuerRecord | null>(
+      "issuer_registry",
+      "get_issuer",
+      issuerDid,
+    );
+    return result ? mapIssuerRecord(result) : undefined;
+  }
+
+  async listIssuers(): Promise<IssuerRecord[]> {
+    const results = await this.callZome<HolochainIssuerRecord[]>(
+      "issuer_registry",
+      "list_issuers",
+      null,
+    );
+    return results.map(mapIssuerRecord);
+  }
+}
+
+interface HolochainIssuerRecord {
+  action_hash: ActionHash;
+  issuer: {
+    issuer_did: string;
+    display_name: string;
+    credential_types: string[];
+    verification_method: string;
+    controller: AgentPubKey;
+    registered_at: string;
+  };
+}
+
+function mapIssuerRecord(record: HolochainIssuerRecord): IssuerRecord {
+  return {
+    actionHash: encodeHashToBase64(record.action_hash),
+    issuerDid: record.issuer.issuer_did,
+    displayName: record.issuer.display_name,
+    credentialTypes: record.issuer.credential_types,
+    verificationMethod: record.issuer.verification_method,
+    controller: encodeHashToBase64(record.issuer.controller),
+    registeredAt: record.issuer.registered_at,
+  };
 }
 

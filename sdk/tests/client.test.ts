@@ -159,3 +159,54 @@ describe("AutonymousVerifierClient.verifyZkProof", () => {
     expect(valid).toBe(false);
   });
 });
+
+describe("AutonymousVerifierClient issuer registry", () => {
+  const issuer = {
+    actionHash: "uhCkkExample",
+    issuerDid: "did:hc:uhCAkExample",
+    displayName: "Example University",
+    credentialTypes: ["DegreeCredential"],
+    verificationMethod: "did:hc:uhCAkExample#agent-key",
+    controller: "uhCAkExample",
+    registeredAt: "2026-09-23T00:00:00Z",
+  };
+
+  it("registers an issuer through the Phase 4 endpoint", async () => {
+    const fetchImpl = fakeFetch(201, issuer);
+    const client = new AutonymousVerifierClient({
+      baseUrl: "https://api.autonymous.me",
+      fetchImpl,
+    });
+
+    await expect(
+      client.registerIssuer({
+        displayName: issuer.displayName,
+        credentialTypes: issuer.credentialTypes,
+        verificationMethod: issuer.verificationMethod,
+      }),
+    ).resolves.toEqual(issuer);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.autonymous.me/api/v1/issuers",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("resolves and lists issuers", async () => {
+    const getFetch = fakeFetch(200, issuer);
+    const getClient = new AutonymousVerifierClient({
+      baseUrl: "https://api.autonymous.me",
+      fetchImpl: getFetch,
+    });
+    await expect(getClient.getIssuer(issuer.issuerDid)).resolves.toEqual(issuer);
+    expect(getFetch).toHaveBeenCalledWith(
+      `https://api.autonymous.me/api/v1/issuers/${encodeURIComponent(issuer.issuerDid)}`,
+      expect.objectContaining({ method: "GET" }),
+    );
+
+    const listClient = new AutonymousVerifierClient({
+      baseUrl: "https://api.autonymous.me",
+      fetchImpl: fakeFetch(200, [issuer]),
+    });
+    await expect(listClient.listIssuers()).resolves.toEqual([issuer]);
+  });
+});

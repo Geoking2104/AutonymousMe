@@ -26,7 +26,7 @@ This repository has moved from specification to working, independently-verified 
 - A REST API (api/, Node/Express) implementing the OpenID4VP request/callback, DID resolution, and credential status endpoints, 12 passing tests against an in-memory backend.
 - A Holochain-backed implementation of that same REST API, **verified end-to-end against real conductors on both 0.6.1 and 0.7.1** (api/scripts/verify-conductor-06.mjs and verify-conductor-07.mjs — 13 checks each: real DID creation/read-back, audit-log writes, presentation recording/listing, real source-chain writes/reads). Note: `hc sandbox call` was removed in 0.7; the 0.7 script installs, enables and exercises the hApp purely over the admin/app websockets.
 - **Multi-agent scenario (tests/)**: a Tryorama 2-agent scenario (community package `@holochain-open-dev/tryorama` 0.20) spins up two independent conductors on a mem network and runs the full holder flow on each — 12 checks, all green on 0.7.1.
-- The DNA package lives in `dnas/core` (the legacy `dnas/autonomous` directory was removed after byte-identical confirmation). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
+- The DNA package lives in `dnas/core` (the legacy `dnas/autonymous` directory was removed after byte-identical confirmation). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
 - Self-hosted network infrastructure kit (infra/bootstrap/): docker-compose + runbook for `kitsune2-bootstrap-srv` (peer discovery / signalling), so production deployments do not depend on the rate-limited public dev-test servers.
 
 What remains: the wallet UI (`ui/`) compiles (client 0.21, 0.5+ enum shapes, no nullable cap_secret) but has not yet been re-verified interactively against the current zomes; the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md); Holochain 0.7 has no data-migration path, so this jump happened before any real user data existed (by design).
@@ -238,8 +238,8 @@ ADMIN_WS_URL=ws://localhost:9100 APP_WS_URL=ws://localhost:9000 \
 **Holochain 0.6** (for environments still pinned there):
 
 ```bash
-hc sandbox call --running <admin-port> install-app --app-id autonomous_me /abs/path/autonymous-me.happ
-hc sandbox call --running <admin-port> enable-app autonomous_me
+hc sandbox call --running <admin-port> install-app --app-id autonymous_me /abs/path/autonymous-me.happ
+hc sandbox call --running <admin-port> enable-app autonymous_me
 hc sandbox call --running <admin-port> add-app-ws 9000
 cd api && node scripts/verify-conductor-06.mjs
 ```

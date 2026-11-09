@@ -1,0 +1,4 @@
+[target.wasm32-unknown-unknown]
+# HDK 0.7 supplies Holochain's host-backed getrandom 0.3 implementation.
+# Selecting the custom backend is required for zome WASM builds.
+rustflags = ["--cfg", "getrandom_backend=\"custom\""]

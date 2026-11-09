@@ -42,3 +42,19 @@ export interface CredentialStatusResult {
   checkedAt: string;
   revokedAt?: string;
 }
+
+export interface RegisterIssuerBody {
+  displayName: string;
+  credentialTypes: string[];
+  verificationMethod: string;
+}
+
+export interface IssuerRecord {
+  actionHash: string;
+  issuerDid: Did;
+  displayName: string;
+  credentialTypes: string[];
+  verificationMethod: string;
+  controller: string;
+  registeredAt: string;
+}

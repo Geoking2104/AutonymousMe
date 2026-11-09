@@ -16,11 +16,11 @@ const PORT = Number(process.env.PORT ?? 3000);
  * `identity_wallet::create_did` + `get_my_did` round trip all succeeded.
  *
  * Env vars (defaults match a local `hc sandbox generate --in-process-lair
- * --run=9000 --app-id autonomous_me autonomous_me.happ` session):
+ * --run=9000 --app-id autonymous_me autonymous-me.happ` session):
  *   ADMIN_WS_URL      default ws://localhost:57871
  *   APP_WS_URL        default ws://localhost:9000
- *   INSTALLED_APP_ID  default autonomous_me
- *   ROLE_NAME         default autonomous
+ *   INSTALLED_APP_ID  default autonymous_me
+ *   ROLE_NAME         default autonymous
  *   WS_ORIGIN         default http://localhost:3000 (required by the
  *                     conductor's websocket handshake; @holochain/client
  *                     does not set an Origin header by default in Node)
@@ -28,8 +28,8 @@ const PORT = Number(process.env.PORT ?? 3000);
 async function connectHolochainBackend(): Promise<HolochainBackend> {
   const adminUrl = process.env.ADMIN_WS_URL ?? "ws://localhost:57871";
   const appUrl = process.env.APP_WS_URL ?? "ws://localhost:9000";
-  const installedAppId = process.env.INSTALLED_APP_ID ?? "autonomous_me";
-  const roleName = process.env.ROLE_NAME ?? "autonomous";
+  const installedAppId = process.env.INSTALLED_APP_ID ?? "autonymous_me";
+  const roleName = process.env.ROLE_NAME ?? "autonymous";
   const wsClientOptions = {
     origin: process.env.WS_ORIGIN ?? "http://localhost:3000",
   };

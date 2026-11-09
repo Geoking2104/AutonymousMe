@@ -9,6 +9,7 @@
 import AutonClient, {
   type CredentialWithHash,
   type AuditEntryWithHash,
+  type IssuerRecordWithHash,
   type PresentationRecordWithHash,
 } from "./client.js";
 
@@ -148,6 +149,24 @@ export async function liveDenyRequest(raw_request: string): Promise<void> {
   if (!client) return;
   await client.denyRequest(raw_request);
   await refreshAuditLog();
+}
+
+// ── Phase 4 issuer registry ───────────────────────────────────────────────
+
+export async function liveRegisterIssuer(params: {
+  display_name: string;
+  credential_types: string[];
+  verification_method: string;
+}): Promise<IssuerRecordWithHash> {
+  if (!client) {
+    throw new Error("Not connected to conductor — running in demo mode");
+  }
+  return client.registerIssuer(params);
+}
+
+export async function liveListIssuers(): Promise<IssuerRecordWithHash[]> {
+  if (!client) return [];
+  return client.listIssuers();
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────

@@ -16,8 +16,8 @@ import { resolve } from "node:path";
 
 const ADMIN_URL = process.env.ADMIN_WS_URL ?? "ws://localhost:9100";
 const APP_PORT_URL = process.env.APP_WS_URL ?? "ws://localhost:9000";
-const INSTALLED_APP_ID = "autonomous_me";
-const ROLE = "autonomous";
+const INSTALLED_APP_ID = "autonymous_me";
+const ROLE = "autonymous";
 
 async function main() {
   const wsClientOptions = { origin: "http://localhost:3000" };

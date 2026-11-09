@@ -1,7 +1,7 @@
 /**
  * Manual end-to-end verification script: connects to a real, already-running
  * Holochain conductor (started via `hc sandbox generate --in-process-lair
- * --run=9000 --app-id autonomous_me autonomous_me.happ` from the repo root)
+ * --run=9000 --app-id autonymous_me autonymous-me.happ` from the repo root)
  * and exercises the identity_wallet and zk_prover zomes for real.
  *
  * This is how the HolochainBackend adapter (src/backends/holochainBackend.ts)
@@ -11,7 +11,7 @@
  *
  * Usage:
  *   1. From the repo root: hc sandbox generate --in-process-lair --run=9000
- *      --app-id autonomous_me autonomous_me.happ
+ *      --app-id autonymous_me autonymous-me.happ
  *   2. From api/: node scripts/verify-conductor.mjs
  */
 import { AdminWebsocket, AppWebsocket } from "@holochain/client";
@@ -29,7 +29,7 @@ async function main() {
   console.log("Installed apps:", apps.map((a) => a.installed_app_id));
 
   const tokenResp = await admin.issueAppAuthenticationToken({
-    installed_app_id: "autonomous_me",
+    installed_app_id: "autonymous_me",
   });
   console.log("Issued app auth token");
 
@@ -41,7 +41,7 @@ async function main() {
   console.log("Connected to app interface");
 
   const appInfo = await app.appInfo();
-  const cellInfoEntry = appInfo.cell_info["autonomous"][0];
+  const cellInfoEntry = appInfo.cell_info["autonymous"][0];
   const cellId = cellInfoEntry.value.cell_id;
   console.log("Cell id:", cellId);
 
@@ -49,7 +49,7 @@ async function main() {
   console.log("Authorized signing credentials");
 
   const createResult = await app.callZome({
-    role_name: "autonomous",
+    role_name: "autonymous",
     zome_name: "identity_wallet",
     fn_name: "create_did",
     payload: { context: "conductor-verification-test" },
@@ -57,7 +57,7 @@ async function main() {
   console.log("create_did result:", JSON.stringify(createResult, null, 2));
 
   const getResult = await app.callZome({
-    role_name: "autonomous",
+    role_name: "autonymous",
     zome_name: "identity_wallet",
     fn_name: "get_my_did",
     payload: null,
@@ -65,7 +65,7 @@ async function main() {
   console.log("get_my_did result:", JSON.stringify(getResult, null, 2));
 
   const zkStore = await app.callZome({
-    role_name: "autonomous",
+    role_name: "autonymous",
     zome_name: "zk_prover",
     fn_name: "list_zk_proofs",
     payload: null,

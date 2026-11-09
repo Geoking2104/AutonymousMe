@@ -51,8 +51,16 @@ mod tests {
             !p.pi_a.is_empty() && !p.pi_b.is_empty() && !p.pi_c.is_empty()
         }
 
-        assert!(well_formed(&Proof { pi_a: "0x1", pi_b: "0x2", pi_c: "0x3" }));
-        assert!(!well_formed(&Proof { pi_a: "", pi_b: "0x2", pi_c: "0x3" }));
+        assert!(well_formed(&Proof {
+            pi_a: "0x1",
+            pi_b: "0x2",
+            pi_c: "0x3"
+        }));
+        assert!(!well_formed(&Proof {
+            pi_a: "",
+            pi_b: "0x2",
+            pi_c: "0x3"
+        }));
     }
 
     #[test]
