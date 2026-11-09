@@ -12,7 +12,7 @@
 import { copyFileSync } from "node:fs";
 import { join } from "node:path";
 
-const zomes = ["identity_wallet", "openid4vp", "zk_prover"];
+const zomes = ["identity_wallet", "openid4vp", "zk_prover", "issuer_registry"];
 const targetDir = join(process.cwd(), "target", "wasm32-unknown-unknown", "release");
 
 for (const zome of zomes) {

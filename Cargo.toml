@@ -5,6 +5,7 @@ members = [
   "dnas/core/zomes/identity_wallet",
   "dnas/core/zomes/openid4vp",
   "dnas/core/zomes/zk_prover",
+  "dnas/core/zomes/issuer_registry",
 ]
 
 [workspace.dependencies]

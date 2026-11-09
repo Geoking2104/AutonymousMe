@@ -2,8 +2,10 @@ import type {
   CredentialStatusResult,
   Did,
   DidDocumentResult,
+  IssuerRecord,
   OpenId4VpRequestBody,
   OpenId4VpRequestRecord,
+  RegisterIssuerBody,
 } from "./types.js";
 
 /**
@@ -31,4 +33,10 @@ export interface AutonymousBackend {
   getCredentialStatus(
     credentialId: string,
   ): Promise<CredentialStatusResult | undefined>;
+
+  registerIssuer(body: RegisterIssuerBody): Promise<IssuerRecord>;
+
+  getIssuer(issuerDid: Did): Promise<IssuerRecord | undefined>;
+
+  listIssuers(): Promise<IssuerRecord[]>;
 }

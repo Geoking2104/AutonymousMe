@@ -62,14 +62,14 @@ node scripts/verify.js                              # verifies build/proof.json
 
 ## How this fits the wallet + verifier flow
 
-1. The wallet (`ui/`, `dnas/autonymous/zomes/identity_wallet`) holds the
+1. The wallet (`ui/`, `dnas/core/zomes/identity_wallet`) holds the
    user's SD-JWT credential with a `birth_year` claim.
 2. When an OpenID4VP request asks for an age >= 18 proof instead of the raw
    date of birth, the wallet runs `scripts/prove.js`-equivalent logic
    (snarkjs, in-browser via the wasm witness calculator) to produce a Groth16
    proof, binding it to the credential via `credential_hash`.
 3. The proof is stored for audit via the `zk_prover` zome's `store_zk_proof`
-   (see `dnas/autonymous/zomes/zk_prover/src/lib.rs`) and embedded in the VP
+   (see `dnas/core/zomes/zk_prover/src/lib.rs`) and embedded in the VP
    Token by `openid4vp::build_vp_token`.
 4. The verifier's REST API (`../../api`) independently re-verifies the proof
    against the published verification key using `snarkjs.groth16.verify` --

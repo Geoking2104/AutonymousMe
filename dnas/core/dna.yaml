@@ -13,6 +13,8 @@ integrity:
       path: "../../target/wasm32-unknown-unknown/release/openid4vp.wasm"
     - name: zk_prover_integrity
       path: "../../target/wasm32-unknown-unknown/release/zk_prover.wasm"
+    - name: issuer_registry_integrity
+      path: "../../target/wasm32-unknown-unknown/release/issuer_registry.wasm"
 
 coordinator:
   zomes:
@@ -28,3 +30,7 @@ coordinator:
       path: "../../target/wasm32-unknown-unknown/release/zk_prover_coordinator.wasm"
       dependencies:
         - name: zk_prover_integrity
+    - name: issuer_registry
+      path: "../../target/wasm32-unknown-unknown/release/issuer_registry_coordinator.wasm"
+      dependencies:
+        - name: issuer_registry_integrity

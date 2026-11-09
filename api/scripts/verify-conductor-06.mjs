@@ -3,8 +3,8 @@
  *
  * Setup (from WSL/Ubuntu, binaries in ~/.local/bin):
  *   holochain --piped -c <sandbox>/conductor-config.yaml   (admin port 9100)
- *   hc sandbox call --running 9100 install-app --app-id autonomous_me /abs/path/autonymous-me.happ
- *   hc sandbox call --running 9100 enable-app autonomous_me
+ *   hc sandbox call --running 9100 install-app --app-id autonymous_me /abs/path/autonymous-me.happ
+ *   hc sandbox call --running 9100 enable-app autonymous_me
  *   hc sandbox call --running 9100 add-app-ws 9000
  *
  * Then: node scripts/verify-conductor-06.mjs   (from api/, Windows or WSL)
@@ -13,8 +13,8 @@ import { AdminWebsocket, AppWebsocket } from "@holochain/client";
 
 const ADMIN_URL = process.env.ADMIN_WS_URL ?? "ws://localhost:9100";
 const APP_URL = process.env.APP_WS_URL ?? "ws://localhost:9000";
-const INSTALLED_APP_ID = "autonomous_me";
-const ROLE = "autonomous";
+const INSTALLED_APP_ID = "autonymous_me";
+const ROLE = "autonymous";
 
 async function main() {
   const wsClientOptions = { origin: "http://localhost:3000" };

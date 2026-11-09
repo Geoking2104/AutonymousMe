@@ -191,12 +191,17 @@ For unlinkability across services, each use context gets a distinct DID. In MVP 
 
 ## Roadmap: upcoming protocol changes
 
-### v0.5 — Issuer Registry
+### Phase 4 - Issuer Registry (vertical slice verified on 0.7.1)
 - DHT-based public issuer registry (DNA entry type: `IssuerRegistration`)
 - Issuer DID resolution from DHT
 - Trust level tiers: self-issued / community / institutional
 
-### v0.6 — Context-specific keypairs
+The first vertical slice is implemented as the public `issuer_registry` zome:
+self-certified immutable issuer profiles, a shared DHT index, and REST/SDK/UI
+client access. It is a discovery directory, not yet a governance-backed trust
+list; accreditation, revocation, and multi-peer validation remain planned.
+
+### Later — Context-specific keypairs
 - Each context DID uses a separate Lair-managed keypair
 - Prevents correlation across services at the cryptographic level
 

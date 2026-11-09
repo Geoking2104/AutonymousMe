@@ -20,16 +20,16 @@ Autonymous.me is an **open-source, non-profit, community-governed protocol** for
 
 This repository has moved from specification to working, independently-verified code, and has been migrated from Holochain 0.4 to **Holochain 0.7** (kitsune2 + iroh/QUIC, action model `header`+`data`, hdk 0.7.1 / hdi 0.8.1, @holochain/client 0.21) — after an intermediate, fully-verified stop on 0.6 (merge #1):
 
-- Three Holochain zomes (identity_wallet, openid4vp, zk_prover) written in Rust against HDK 0.7.1 / HDI 0.8.1. All three compile to wasm32-unknown-unknown in release mode (with the `--cfg getrandom_backend="custom"` flag) and pass 13 integration tests + clippy `-D warnings`. The 0.7 action-model rewrite is applied: `validate` callbacks flatten the `Op` (`op.flattened::<EntryTypes, LinkTypes>()`) and match on the typed `FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. })` — stricter than the old raw-bytes probing.
+- Four Holochain zomes (identity_wallet, openid4vp, zk_prover, issuer_registry) written in Rust against HDK 0.7.1 / HDI 0.8.1. All four compile to wasm32-unknown-unknown in release mode (with the `--cfg getrandom_backend="custom"` flag) and pass 15 integration/unit tests + clippy `-D warnings`. The 0.7 action-model rewrite is applied: `validate` callbacks flatten the `Op` (`op.flattened::<EntryTypes, LinkTypes>()`) and match on the typed `FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. })` — stricter than the old raw-bytes probing.
 - A real zk-SNARK circuit (circuits/age_check, Circom 2.1.4) proving age >= 18 without revealing date of birth, verified with a real (dev-only) Groth16 trusted setup: witness correctness, proof generation, and cryptographic verification.
 - A verifier-facing TypeScript SDK (sdk/), 9 passing unit tests, local offline zk proof verification via snarkjs.
 - A REST API (api/, Node/Express) implementing the OpenID4VP request/callback, DID resolution, and credential status endpoints, 12 passing tests against an in-memory backend.
 - A Holochain-backed implementation of that same REST API, **verified end-to-end against real conductors on both 0.6.1 and 0.7.1** (api/scripts/verify-conductor-06.mjs and verify-conductor-07.mjs — 13 checks each: real DID creation/read-back, audit-log writes, presentation recording/listing, real source-chain writes/reads). Note: `hc sandbox call` was removed in 0.7; the 0.7 script installs, enables and exercises the hApp purely over the admin/app websockets.
 - **Multi-agent scenario (tests/)**: a Tryorama 2-agent scenario (community package `@holochain-open-dev/tryorama` 0.20) spins up two independent conductors on a mem network and runs the full holder flow on each — 12 checks, all green on 0.7.1.
-- The DNA package lives in `dnas/core` (the legacy `dnas/autonomous` directory was removed after byte-identical confirmation). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
+- The DNA package lives in `dnas/core` (the legacy `dnas/autonymous` directory was removed after byte-identical confirmation). Manifests use `manifest_version: "0"` with `path:` fields as required by Holochain 0.5+.
 - Self-hosted network infrastructure kit (infra/bootstrap/): docker-compose + runbook for `kitsune2-bootstrap-srv` (peer discovery / signalling), so production deployments do not depend on the rate-limited public dev-test servers.
 
-What remains: the wallet UI (`ui/`) compiles (client 0.21, 0.5+ enum shapes, no nullable cap_secret) but has not yet been re-verified interactively against the current zomes; the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md); Holochain 0.7 has no data-migration path, so this jump happened before any real user data existed (by design).
+What remains: the wallet UI (`ui/`) compiles (client 0.21, 0.5+ enum shapes, no nullable cap_secret; type-checked and built with `tsc --noEmit` + vite) but has not yet been re-verified interactively against the current zomes; the zk circuit's trusted setup is dev-only and explicitly not production-safe (see circuits/age_check/README.md); Holochain 0.7 has no data-migration path, so this jump happened before any real user data existed (by design).
 
 If you are evaluating this project for a contribution, a partnership, or an eIDAS 2.0 compliance need: get in touch via [Issues](https://github.com/Geoking2104/AutonymousMe/issues) or support@autonymous.me.
 ---
@@ -124,7 +124,7 @@ eIDAS 2.0 requires a wallet, an issuer, and a verifier. Autonymous.me adds:
 
 ```
 AutonymousMe/
-  Cargo.toml                       - Rust workspace manifest (3 zomes)
+  Cargo.toml                       - Rust workspace manifest (4 zomes)
   happ.yaml                        - Holochain hApp manifest
   conductor-config.yaml            - Local conductor configuration
   Makefile, Dockerfile             - Build and container helpers
@@ -133,7 +133,8 @@ AutonymousMe/
     zomes/
       identity_wallet/             - DID lifecycle, credential wallet, audit log (Rust/HDK 0.6.1)
       openid4vp/                   - OpenID4VP request/response flow (Rust/HDK 0.6.1)
-      zk_prover/                   - zk proof storage/audit zome (Rust/HDK 0.6.1)
+      zk_prover/                   - zk proof storage/audit zome (Rust/HDK 0.7.1)
+      issuer_registry/             - Phase 4: public DHT issuer profiles (did:hc self-certifying, immutable)
   circuits/age_check/              - Circom age>=18 circuit + Groth16 prove/verify scripts
   sdk/                             - Verifier-facing TypeScript SDK
   api/                             - REST API (Node/Express), spec section 8
@@ -238,8 +239,8 @@ ADMIN_WS_URL=ws://localhost:9100 APP_WS_URL=ws://localhost:9000 \
 **Holochain 0.6** (for environments still pinned there):
 
 ```bash
-hc sandbox call --running <admin-port> install-app --app-id autonomous_me /abs/path/autonymous-me.happ
-hc sandbox call --running <admin-port> enable-app autonomous_me
+hc sandbox call --running <admin-port> install-app --app-id autonymous_me /abs/path/autonymous-me.happ
+hc sandbox call --running <admin-port> enable-app autonymous_me
 hc sandbox call --running <admin-port> add-app-ws 9000
 cd api && node scripts/verify-conductor-06.mjs
 ```
@@ -308,7 +309,7 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 | 1 - Core protocol design | Done | DID method, zk circuit design, SD-JWT schema - see Technical_Specifications.docx |
 | 2 - Zomes, circuit, SDK, API | Done, unit/integration tested | identity_wallet, openid4vp, zk_prover zomes (13 tests + clippy clean); age_check circuit (real Groth16 proof verified); verifier SDK (9 tests); REST API (12 tests) — all on Holochain 0.7 (hdk 0.7.1 / hdi 0.8.1) |
 | 3 - End-to-end integration | Done for the REST API / Holochain backend + multi-agent | HolochainBackend verified end-to-end against live conductors **0.6.1 and 0.7.1** (13-check scenarios: api/scripts/verify-conductor-06.mjs & verify-conductor-07.mjs); Tryorama 2-agent scenario (12 checks) on 0.7.1. Wallet UI (ui/) still needs interactive re-verification against the current zomes |
-| 4 - Issuer registry & production trusted setup | Not started | DHT-based issuer registry; production-grade Powers of Tau ceremony (current one is dev-only) |
+| 4 - Issuer registry & production trusted setup | **In progress - vertical slice merged** | `issuer_registry` zome live on 0.7.1 (register/resolve/list + duplicate guard, Tryorama-verified); REST API `/api/v1/issuers`; SDK + UI client methods. Remaining: browser extension, production-grade Powers of Tau ceremony (current one is dev-only) |
 | 5 - Mobile app & governance | Planned | iOS/Android, community governance v1 |
 | 6 - eIDAS 2.0 production | Planned | Certification, EUDI Wallet bridge |
 ---

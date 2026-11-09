@@ -629,6 +629,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "issuer_registry"
+version = "0.4.0"
+dependencies = [
+ "hdi",
+ "hdk",
+ "holochain_serialized_bytes",
+ "serde",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"

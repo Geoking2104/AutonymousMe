@@ -49,6 +49,14 @@ const result = await client.verifyVpToken({
   zkProof: receivedZkProofClaim, // optional
 });
 
+// Phase 4: issuer registry (DHT-backed issuer profiles)
+const issuer = await client.registerIssuer({
+  displayName: "University of Example",
+  credentialTypes: ["UniversityDegree"],
+  verificationMethod: "did:hc:university-example#key-1",
+});
+const resolved = await client.getIssuer("did:hc:uhCAk...");
+const all = await client.listIssuers();
 if (!result.valid) {
   console.error("Presentation rejected:", result.errors);
 }

@@ -5,6 +5,7 @@ import type { AutonymousBackend } from "./backend.js";
 import { credentialRouter } from "./routes/credential.js";
 import { didRouter } from "./routes/did.js";
 import { openId4VpRouter } from "./routes/openid4vp.js";
+import { issuerRouter } from "./routes/issuer.js";
 
 /**
  * Builds the Express app given a backend implementation. Kept as a factory
@@ -25,6 +26,7 @@ export function createApp(backend: AutonymousBackend): Express {
   app.use("/api/v1/openid4vp", openId4VpRouter(backend));
   app.use("/api/v1/did", didRouter(backend));
   app.use("/api/v1/credential", credentialRouter(backend));
+  app.use("/api/v1/issuers", issuerRouter(backend));
 
   app.use((_req, res) => {
     res.status(404).json({ error: "Not found" });

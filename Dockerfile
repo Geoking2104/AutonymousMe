@@ -21,7 +21,7 @@ RUN cargo build \
     --workspace
 
 # Copy coordinator wasms to the distinct paths required by dna.yaml
-RUN for z in identity_wallet openid4vp zk_prover; do \
+RUN for z in identity_wallet openid4vp zk_prover issuer_registry; do \
       cp target/wasm32-unknown-unknown/release/$z.wasm \
          target/wasm32-unknown-unknown/release/${z}_coordinator.wasm; \
     done

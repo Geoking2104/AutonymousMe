@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Multi-agent Tryorama scenario for the Autonymous.me hApp.
  *
  * Two players (Alice, Bob) each get their own conductor running the hApp,
@@ -19,7 +19,7 @@ import { encodeHashToBase64 } from "@holochain/client";
 const HAPP_PATH =
   process.env.HAPP_PATH ?? new URL("../../autonymous-me.happ", import.meta.url).pathname;
 
-const ROLE = "autonomous";
+const ROLE = "autonymous";
 
 interface DidOutput {
   did: string;
@@ -35,6 +35,16 @@ interface AuditEntryWithHash {
   entry: { action_type: string; description: string };
 }
 
+interface IssuerRecordWithHash {
+  action_hash: unknown;
+  issuer: {
+    issuer_did: string;
+    display_name: string;
+    credential_types: string[];
+    verification_method: string;
+    registered_at: string;
+  };
+}
 interface PresentationRecordWithHash {
   record: { nonce: string; outcome: string; verifier: string };
 }
@@ -105,6 +115,64 @@ async function exerciseHolderFlow(
   console.log(`agent ${index} (${created.did.slice(0, 24)}...): holder flow OK`);
 }
 
+async function exerciseIssuerRegistry(
+  player: Awaited<ReturnType<Scenario["addPlayerWithApp"]>>,
+): Promise<void> {
+  const cell = player.cells[0];
+
+  const registered = await cell.callZome<IssuerRecordWithHash>({
+    zome_name: "issuer_registry",
+    fn_name: "register_issuer",
+    payload: {
+      display_name: "Tryorama Test University",
+      credential_types: ["UniversityDegree"],
+      verification_method: "did:hc:test-university#key-1",
+    },
+  });
+  if (!registered.issuer.issuer_did.startsWith("did:hc:")) {
+    throw new Error(`issuer registry: unexpected DID ${registered.issuer.issuer_did}`);
+  }
+
+  const resolved = await cell.callZome<IssuerRecordWithHash | null>({
+    zome_name: "issuer_registry",
+    fn_name: "get_issuer",
+    payload: registered.issuer.issuer_did,
+  });
+  if (!resolved || resolved.issuer.display_name !== "Tryorama Test University") {
+    throw new Error("issuer registry: get_issuer mismatch");
+  }
+
+  const listed = await cell.callZome<IssuerRecordWithHash[]>({
+    zome_name: "issuer_registry",
+    fn_name: "list_issuers",
+    payload: null,
+  });
+  if (!listed.some((i) => i.issuer.issuer_did === registered.issuer.issuer_did)) {
+    throw new Error("issuer registry: list_issuers missing the registered profile");
+  }
+
+  let duplicateRejected = false;
+  try {
+    await cell.callZome({
+      zome_name: "issuer_registry",
+      fn_name: "register_issuer",
+      payload: {
+        display_name: "Duplicate",
+        credential_types: ["X"],
+        verification_method: "did:hc:dup#key-1",
+      },
+    });
+  } catch {
+    duplicateRejected = true;
+  }
+  if (!duplicateRejected) {
+    throw new Error("issuer registry: duplicate registration was not rejected");
+  }
+
+  console.log(
+    `issuer registry OK (${registered.issuer.issuer_did.slice(0, 24)}...): register, resolve, list, duplicate-guard`,
+  );
+}
 async function main(): Promise<void> {
   const scenario = new Scenario();
   try {
@@ -120,7 +188,9 @@ async function main(): Promise<void> {
     await exerciseHolderFlow(alice, 0);
     await exerciseHolderFlow(bob, 1);
 
-    console.log("\nTRYORAMA SCENARIO PASSED â€” 2 independent conductors, 12 checks green");
+    await exerciseIssuerRegistry(alice);
+
+    console.log("\nTRYORAMA SCENARIO PASSED Ã¢â‚¬â€ 2 independent conductors, 12 checks green");
   } finally {
     await scenario.shutDown();
   }
