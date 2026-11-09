@@ -1,7 +1,7 @@
 {
   "name": "@autonymous.me/ui",
   "version": "0.4.0",
-  "description": "Autonymous.me wallet UI — OpenID4VP · SD-JWT · eIDAS 2.0",
+  "description": "Autonymous.me wallet UI â€” OpenID4VP Â· SD-JWT Â· eIDAS 2.0",
   "type": "module",
   "scripts": {
     "dev":      "vite",
@@ -11,7 +11,7 @@
     "lint":     "eslint src --ext .ts,.js"
   },
   "dependencies": {
-    "@holochain/client": "^0.20.0"
+    "@holochain/client": "^0.21.0"
   },
   "devDependencies": {
     "vite":         "^5.0.0",

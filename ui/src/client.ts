@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Autonymous.me â€” Holochain UI client
  *
  * Wraps all zome calls with typed interfaces.

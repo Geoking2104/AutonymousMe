@@ -6,13 +6,14 @@
   "workspaces": [
     "ui",
     "api",
-    "sdk"
+    "sdk",
+    "tests"
   ],
   "scripts": {
     "start": "AGENTS=${AGENTS:-2} npm run network",
     "network": "hc sandbox clean && npm run build:happ && UI_PORT=$(get-port) concurrently \"npm run start --workspace ui\" \"npm run launch:happ\"",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT autonymous-me.happ",
-    "test": "npm run build:zomes && npm run test --workspace api && npm run test --workspace sdk",
+    "test": "npm run build:zomes && npm run test --workspace api && npm run test --workspace sdk && npm run test --workspace tests",
     "package": "npm run build:happ && npm run build --workspace ui && hc web-app pack . --output autonymous-me.webhapp",
     "build:happ": "npm run build:zomes && npm run copy-coordinator-wasms && hc dna pack dnas/core/ --output dnas/core/core.dna && hc app pack . --output autonymous-me.happ",
     "build:zomes": "RUSTFLAGS='--cfg getrandom_backend=\"custom\"' cargo build --release --target wasm32-unknown-unknown --workspace",

@@ -13,6 +13,8 @@
 //!   - eIDAS 2.0:       https://eur-lex.europa.eu/eli/reg/2024/1183/oj
 
 use hdk::prelude::*;
+use hdi::flat_op::FlatOp;
+use hdi::flat_op::OpEntry;
 use serde::{Deserialize, Serialize};
 
 // ??????????????????????????????? ENTRY TYPES ???????????????????????????????
@@ -251,22 +253,22 @@ pub fn list_presentations(_: ()) -> ExternResult<Vec<PresentationRecordWithHash>
 
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
-    let Op::StoreEntry(store_entry) = op else {
+    // Holochain 0.7: flatten Op; FlatOp::CreateEntry carries the typed entry.
+    let flat = op.flattened::<EntryTypes, LinkTypes>()?;
+    let FlatOp::CreateEntry(OpEntry::CreateEntry { app_entry, .. }) = flat else {
         return Ok(ValidateCallbackResult::Valid);
     };
 
-    if let Entry::App(bytes) = &store_entry.entry {
-        let sb = SerializedBytes::from(bytes.clone());
-        if let Ok(req) = AuthorizationRequest::try_from(sb.clone()) {
+    match app_entry {
+        EntryTypes::AuthorizationRequest(req) => {
             if req.nonce.is_empty() {
                 return Ok(ValidateCallbackResult::Invalid("Nonce is required".into()));
             }
             if req.client_id.is_empty() {
                 return Ok(ValidateCallbackResult::Invalid("client_id is required".into()));
             }
-            return Ok(ValidateCallbackResult::Valid);
         }
-        if let Ok(rec) = PresentationRecord::try_from(sb) {
+        EntryTypes::PresentationRecord(rec) => {
             if rec.outcome != "approved" && rec.outcome != "denied" {
                 return Ok(ValidateCallbackResult::Invalid(
                     "outcome must be 'approved' or 'denied'".into(),
