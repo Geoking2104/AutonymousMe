@@ -1,8 +1,8 @@
 {
   "name": "autonymous-me",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
-  "description": "Autonymous.me — self-sovereign identity hApp on Holochain 0.6 (zomes, wallet UI, verifier SDK, REST API)",
+  "description": "Autonymous.me — self-sovereign identity hApp on Holochain 0.7 (zomes, wallet UI, verifier SDK, REST API)",
   "workspaces": [
     "ui",
     "api",

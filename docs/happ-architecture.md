@@ -191,7 +191,7 @@ For unlinkability across services, each use context gets a distinct DID. In MVP 
 
 ## Roadmap: upcoming protocol changes
 
-### Phase 4 — Issuer Registry (in development)
+### Phase 4 - Issuer Registry (vertical slice verified on 0.7.1)
 - DHT-based public issuer registry (DNA entry type: `IssuerRegistration`)
 - Issuer DID resolution from DHT
 - Trust level tiers: self-issued / community / institutional

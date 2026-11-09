@@ -1,6 +1,6 @@
 # Holochain 0.7 migration and Phase 4 integration
 
-Updated: 2026-09-23
+Updated: 2026-11-09 (integrated onto main via PR #2 0.7.1 baseline; Tryorama issuer-registry slice green)
 
 ## Compatibility baseline
 
